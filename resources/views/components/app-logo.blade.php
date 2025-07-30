@@ -1,6 +1,9 @@
-<div class="flex aspect-square size-8 items-center justify-center rounded-md bg-accent-content text-accent-foreground">
-    <x-app-logo-icon class="size-5 fill-current text-white dark:text-black" />
-</div>
-<div class="ms-1 grid flex-1 text-start text-sm">
-    <span class="mb-0.5 truncate leading-tight font-semibold">Laravel Starter Kit</span>
+<div class="flex items-center space-x-4">
+    <div class="neon-glow">
+        <x-app-logo-icon />
+    </div>
+    <div>
+        <span class="text-3xl font-black text-gradient-premium">RhetaBica</span>
+        <div class="text-xs mono text-cyan-400 opacity-80">The Future of Debate Tabulation</div>
+    </div>
 </div>

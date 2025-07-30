@@ -1,8 +1,41 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 42" {{ $attributes }}>
-    <path 
-        fill="currentColor" 
-        fill-rule="evenodd" 
-        clip-rule="evenodd"
-        d="M17.2 5.633 8.6.855 0 5.633v26.51l16.2 9 16.2-9v-8.442l7.6-4.223V9.856l-8.6-4.777-8.6 4.777V18.3l-5.6 3.111V5.633ZM38 18.301l-5.6 3.11v-6.157l5.6-3.11V18.3Zm-1.06-7.856-5.54 3.078-5.54-3.079 5.54-3.078 5.54 3.079ZM24.8 18.3v-6.157l5.6 3.111v6.158L24.8 18.3Zm-1 1.732 5.54 3.078-13.14 7.302-5.54-3.078 13.14-7.3v-.002Zm-16.2 7.89 7.6 4.222V38.3L2 30.966V7.92l5.6 3.111v16.892ZM8.6 9.3 3.06 6.222 8.6 3.143l5.54 3.08L8.6 9.3Zm21.8 15.51-13.2 7.334V38.3l13.2-7.334v-6.156ZM9.6 11.034l5.6-3.11v14.6l-5.6 3.11v-14.6Z"
-    />
+    <!-- Background gradient circle -->
+    <defs>
+        <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#1e40af;stop-opacity:1" />
+            <stop offset="50%" style="stop-color:#7c3aed;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#f59e0b;stop-opacity:1" />
+        </linearGradient>
+        <linearGradient id="podiumGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#fbbf24;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#f59e0b;stop-opacity:1" />
+        </linearGradient>
+        <linearGradient id="speechGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#ffffff;stop-opacity:0.9" />
+            <stop offset="100%" style="stop-color:#e5e7eb;stop-opacity:0.8" />
+        </linearGradient>
+    </defs>
+    
+    <!-- Main background -->
+    <rect x="2" y="2" width="36" height="38" rx="8" ry="8" fill="url(#bgGradient)" stroke="#1e293b" stroke-width="0.5"/>
+    
+    <!-- Podium/ranking element -->
+    <rect x="8" y="28" width="4" height="8" fill="url(#podiumGradient)" rx="1"/>
+    <rect x="14" y="24" width="4" height="12" fill="url(#podiumGradient)" rx="1"/>
+    <rect x="20" y="26" width="4" height="10" fill="url(#podiumGradient)" rx="1"/>
+    
+    <!-- Speech bubble representing debate -->
+    <path d="M10 8 Q10 6 12 6 L28 6 Q30 6 30 8 L30 16 Q30 18 28 18 L16 18 L12 22 L12 18 Q10 18 10 16 Z" 
+          fill="url(#speechGradient)" 
+          stroke="#cbd5e1" 
+          stroke-width="0.3"/>
+    
+    <!-- Debate argument lines inside speech bubble -->
+    <line x1="14" y1="10" x2="26" y2="10" stroke="#1e40af" stroke-width="1.5" stroke-linecap="round"/>
+    <line x1="14" y1="13" x2="24" y2="13" stroke="#7c3aed" stroke-width="1.2" stroke-linecap="round"/>
+    <line x1="14" y1="16" x2="22" y2="16" stroke="#f59e0b" stroke-width="1" stroke-linecap="round"/>
+    
+    <!-- Trophy/ranking symbol -->
+    <circle cx="32" cy="12" r="3" fill="#fbbf24" stroke="#f59e0b" stroke-width="0.5"/>
+    <path d="M32 10 L33 12 L32 14 L31 12 Z" fill="#f59e0b"/>
 </svg>
