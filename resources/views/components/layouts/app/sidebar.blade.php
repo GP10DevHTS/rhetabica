@@ -16,9 +16,12 @@
                     <flux:navlist.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>{{ __('Dashboard') }}</flux:navlist.item>
                 </flux:navlist.group>
 
-                <flux:navlist.group :heading="__('Package Management')" class="grid">
-                    <flux:navlist.item icon="cube" :href="route('dashboard')" wire:navigate>{{ __('Packages') }}</flux:navlist.item>
-                </flux:navlist.group>
+                @if(auth()->user()->is_admin)
+                    <flux:navlist.group :heading="__('Package Management')" class="grid">
+                        <flux:navlist.item icon="cube" :href="route('packages.index')" :current="request()->routeIs('packages.*')" wire:navigate>{{ __('Packages') }}</flux:navlist.item>
+                        <flux:navlist.item icon="credit-card" :href="route('subscriptions.index')" :current="request()->routeIs('subscriptions.*')" wire:navigate>{{ __('Subscriptions') }}</flux:navlist.item>
+                    </flux:navlist.group>
+                @endif
             </flux:navlist>
 
             <flux:spacer />
