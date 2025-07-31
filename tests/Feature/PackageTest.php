@@ -136,7 +136,7 @@ test('admin cannot delete package with active subscriptions', function () {
 
     Livewire::test(Index::class)
         ->call('deletePackage', $package->id)
-        ->assertNotRedirected();
+        ->assertNoRedirect();
 
     $this->assertDatabaseHas('packages', ['id' => $package->id]);
 });
@@ -166,6 +166,6 @@ test('package scope active works', function () {
 
     $activePackages = Package::active()->get();
 
-    expect($activePackages)->toContain($activePackage);
-    expect($activePackages)->not->toContain($inactivePackage);
+    expect($activePackages->pluck('id'))->toContain($activePackage->id);
+    expect($activePackages->pluck('id'))->not->toContain($inactivePackage->id);
 }); 

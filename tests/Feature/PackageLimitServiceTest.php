@@ -173,18 +173,18 @@ test('get user limits returns correct data for admin', function () {
     $limits = $this->service->getUserLimits($this->admin);
 
     expect($limits)->toHaveKey('tab_spaces');
-    expect($limits)->toHaveKey('tournaments');
+    expect($limits)->toHaveKey('tournaments_per_tab');
     expect($limits['tab_spaces'])->toBe(-1); // Unlimited
-    expect($limits['tournaments'])->toBe(-1); // Unlimited
+    expect($limits['tournaments_per_tab'])->toBe(-1); // Unlimited
 });
 
 test('get user limits returns correct data for user without subscription', function () {
     $limits = $this->service->getUserLimits($this->user);
 
     expect($limits)->toHaveKey('tab_spaces');
-    expect($limits)->toHaveKey('tournaments');
+    expect($limits)->toHaveKey('tournaments_per_tab');
     expect($limits['tab_spaces'])->toBe(0);
-    expect($limits['tournaments'])->toBe(0);
+    expect($limits['tournaments_per_tab'])->toBe(0);
 });
 
 test('get user limits returns correct data for user with subscription', function () {
@@ -199,9 +199,9 @@ test('get user limits returns correct data for user with subscription', function
     $limits = $this->service->getUserLimits($this->user);
 
     expect($limits)->toHaveKey('tab_spaces');
-    expect($limits)->toHaveKey('tournaments');
+    expect($limits)->toHaveKey('tournaments_per_tab');
     expect($limits['tab_spaces'])->toBe(5); // Should match package max_tab_spaces
-    expect($limits['tournaments'])->toBe(10); // Should match package max_tournaments_per_tab
+    expect($limits['tournaments_per_tab'])->toBe(10); // Should match package max_tournaments_per_tab
 });
 
 test('user with inactive subscription has zero slots', function () {

@@ -179,9 +179,12 @@ test('admin can extend subscription', function () {
         ->call('save')
         ->assertRedirect(route('subscriptions.index'));
 
+    // The datetime-local input only captures minutes, so seconds will be 00
+    $expectedDate = $newEndDate->format('Y-m-d H:i') . ':00';
+
     $this->assertDatabaseHas('subscriptions', [
         'id' => $subscription->id,
-        'end_date' => $newEndDate->format('Y-m-d H:i:s'),
+        'end_date' => $expectedDate,
     ]);
 });
 
@@ -255,8 +258,8 @@ test('user can get active subscription', function () {
 
     $userActiveSubscription = $this->user->activeSubscription();
 
-    expect($userActiveSubscription)->toBe($activeSubscription);
-    expect($userActiveSubscription)->not->toBe($inactiveSubscription);
+    expect($userActiveSubscription->id)->toBe($activeSubscription->id);
+    expect($userActiveSubscription->id)->not->toBe($inactiveSubscription->id);
 });
 
 test('user without active subscription returns null', function () {
