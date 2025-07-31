@@ -1,263 +1,221 @@
 <?php
 
-namespace Tests\Feature;
-
 use App\Models\Package;
 use App\Models\Subscription;
 use App\Models\User;
 use App\Services\PackageLimitService;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
 
-class PackageLimitServiceTest extends TestCase
-{
-    use RefreshDatabase;
-
-    protected PackageLimitService $service;
-    protected User $admin;
-    protected User $user;
-    protected Package $package;
-
-    protected function setUp(): void
-    {
-        parent::setUp();
-        
-        $this->service = new PackageLimitService();
-        
-        $this->admin = User::factory()->admin()->create([
-            'email' => 'admin@rhetabica.net',
-        ]);
-        
-        $this->user = User::factory()->create([
-            'email' => 'user@rhetabica.com',
-        ]);
-
-        $this->package = Package::factory()->create([
-            'name' => 'Test Package',
-            'max_tab_spaces' => 5,
-            'max_tournaments_per_tab' => 10,
-        ]);
-    }
-
+beforeEach(function () {
+    $this->service = new PackageLimitService();
     
-    public function admin_can_always_create_tab_spaces()
-    {
-        $this->assertTrue($this->service->canCreateTabSpace($this->admin));
-    }
-
+    $this->admin = User::factory()->admin()->create([
+        'email' => 'admin@rhetabica.net',
+    ]);
     
-    public function admin_can_always_create_tournaments()
-    {
-        $this->assertTrue($this->service->canCreateTournamentInTabSpace($this->admin));
-    }
+    $this->user = User::factory()->create([
+        'email' => 'user@rhetabica.com',
+    ]);
 
-    
-    public function user_without_subscription_cannot_create_tab_spaces()
-    {
-        $this->assertFalse($this->service->canCreateTabSpace($this->user));
-    }
+    $this->package = Package::factory()->create([
+        'name' => 'Test Package',
+        'max_tab_spaces' => 5,
+        'max_tournaments_per_tab' => 10,
+    ]);
+});
 
-    
-    public function user_without_subscription_cannot_create_tournaments()
-    {
-        $this->assertFalse($this->service->canCreateTournamentInTabSpace($this->user));
-    }
+test('admin can always create tab spaces', function () {
+    expect($this->service->canCreateTabSpace($this->admin))->toBeTrue();
+});
 
-    
-    public function user_with_active_subscription_can_create_tab_spaces_within_limit()
-    {
-        // Create active subscription
-        Subscription::factory()->create([
-            'user_id' => $this->user->id,
-            'package_id' => $this->package->id,
-            'status' => 'active',
-            'end_date' => now()->addDays(30),
-        ]);
+test('admin can always create tournaments', function () {
+    expect($this->service->canCreateTournamentInTabSpace($this->admin))->toBeTrue();
+});
 
-        $this->assertTrue($this->service->canCreateTabSpace($this->user));
-    }
+test('user without subscription cannot create tab spaces', function () {
+    expect($this->service->canCreateTabSpace($this->user))->toBeFalse();
+});
 
-    
-    public function user_with_active_subscription_can_create_tournaments_within_limit()
-    {
-        // Create active subscription
-        Subscription::factory()->create([
-            'user_id' => $this->user->id,
-            'package_id' => $this->package->id,
-            'status' => 'active',
-            'end_date' => now()->addDays(30),
-        ]);
+test('user without subscription cannot create tournaments', function () {
+    expect($this->service->canCreateTournamentInTabSpace($this->user))->toBeFalse();
+});
 
-        $this->assertTrue($this->service->canCreateTournamentInTabSpace($this->user));
-    }
+test('user with active subscription can create tab spaces within limit', function () {
+    // Create active subscription
+    Subscription::factory()->create([
+        'user_id' => $this->user->id,
+        'package_id' => $this->package->id,
+        'status' => 'active',
+        'end_date' => now()->addDays(30),
+    ]);
 
-    
-    public function user_with_expired_subscription_cannot_create_tab_spaces()
-    {
-        // Create expired subscription
-        Subscription::factory()->create([
-            'user_id' => $this->user->id,
-            'package_id' => $this->package->id,
-            'status' => 'active',
-            'end_date' => now()->subDays(30),
-        ]);
+    expect($this->service->canCreateTabSpace($this->user))->toBeTrue();
+});
 
-        $this->assertFalse($this->service->canCreateTabSpace($this->user));
-    }
+test('user with active subscription can create tournaments within limit', function () {
+    // Create active subscription
+    Subscription::factory()->create([
+        'user_id' => $this->user->id,
+        'package_id' => $this->package->id,
+        'status' => 'active',
+        'end_date' => now()->addDays(30),
+    ]);
 
-    
-    public function user_with_expired_subscription_cannot_create_tournaments()
-    {
-        // Create expired subscription
-        Subscription::factory()->create([
-            'user_id' => $this->user->id,
-            'package_id' => $this->package->id,
-            'status' => 'active',
-            'end_date' => now()->subDays(30),
-        ]);
+    expect($this->service->canCreateTournamentInTabSpace($this->user))->toBeTrue();
+});
 
-        $this->assertFalse($this->service->canCreateTournamentInTabSpace($this->user));
-    }
+test('user with expired subscription cannot create tab spaces', function () {
+    // Create expired subscription
+    Subscription::factory()->create([
+        'user_id' => $this->user->id,
+        'package_id' => $this->package->id,
+        'status' => 'active',
+        'end_date' => now()->subDays(30),
+    ]);
 
-    
-    public function admin_has_unlimited_tab_space_slots()
-    {
-        $this->assertEquals(-1, $this->service->getRemainingTabSpaceSlots($this->admin));
-    }
+    expect($this->service->canCreateTabSpace($this->user))->toBeFalse();
+});
 
-    
-    public function admin_has_unlimited_tournament_slots()
-    {
-        $this->assertEquals(-1, $this->service->getRemainingTournamentSlotsInTabSpace($this->admin));
-    }
+test('user with expired subscription cannot create tournaments', function () {
+    // Create expired subscription
+    Subscription::factory()->create([
+        'user_id' => $this->user->id,
+        'package_id' => $this->package->id,
+        'status' => 'active',
+        'end_date' => now()->subDays(30),
+    ]);
 
-    
-    public function user_without_subscription_has_zero_tab_space_slots()
-    {
-        $this->assertEquals(0, $this->service->getRemainingTabSpaceSlots($this->user));
-    }
+    expect($this->service->canCreateTournamentInTabSpace($this->user))->toBeFalse();
+});
 
-    
-    public function user_without_subscription_has_zero_tournament_slots()
-    {
-        $this->assertEquals(0, $this->service->getRemainingTournamentSlotsInTabSpace($this->user));
-    }
+test('admin has unlimited tab space slots', function () {
+    $slots = $this->service->getTabSpaceSlots($this->admin);
+    expect($slots)->toBe(-1); // -1 indicates unlimited
+});
 
-    public function user_with_active_subscription_has_correct_tab_space_slots()
-    {
-        // Create active subscription
-        Subscription::factory()->create([
-            'user_id' => $this->user->id,
-            'package_id' => $this->package->id,
-            'status' => 'active',
-            'end_date' => now()->addDays(30),
-        ]);
+test('admin has unlimited tournament slots', function () {
+    $slots = $this->service->getTournamentSlots($this->admin);
+    expect($slots)->toBe(-1); // -1 indicates unlimited
+});
 
-        // Package allows 5 tab spaces, user has 0 currently
-        $this->assertEquals(5, $this->service->getRemainingTabSpaceSlots($this->user));
-    }
+test('user without subscription has zero tab space slots', function () {
+    $slots = $this->service->getTabSpaceSlots($this->user);
+    expect($slots)->toBe(0);
+});
 
-    public function user_with_active_subscription_has_correct_tournament_slots()
-    {
-        // Create active subscription
-        Subscription::factory()->create([
-            'user_id' => $this->user->id,
-            'package_id' => $this->package->id,
-            'status' => 'active',
-            'end_date' => now()->addDays(30),
-        ]);
+test('user without subscription has zero tournament slots', function () {
+    $slots = $this->service->getTournamentSlots($this->user);
+    expect($slots)->toBe(0);
+});
 
-        // Package allows 10 tournaments per tab, user has 0 currently
-        $this->assertEquals(10, $this->service->getRemainingTournamentSlotsInTabSpace($this->user));
-    }
+test('user with active subscription has correct tab space slots', function () {
+    // Create active subscription
+    Subscription::factory()->create([
+        'user_id' => $this->user->id,
+        'package_id' => $this->package->id,
+        'status' => 'active',
+        'end_date' => now()->addDays(30),
+    ]);
 
-    public function package_with_unlimited_tab_spaces_returns_unlimited_slots()
-    {
-        $unlimitedPackage = Package::factory()->create([
-            'max_tab_spaces' => -1,
-            'max_tournaments_per_tab' => 10,
-        ]);
+    $slots = $this->service->getTabSpaceSlots($this->user);
+    expect($slots)->toBe(5); // Should match package max_tab_spaces
+});
 
-        Subscription::factory()->create([
-            'user_id' => $this->user->id,
-            'package_id' => $unlimitedPackage->id,
-            'status' => 'active',
-            'end_date' => now()->addDays(30),
-        ]);
+test('user with active subscription has correct tournament slots', function () {
+    // Create active subscription
+    Subscription::factory()->create([
+        'user_id' => $this->user->id,
+        'package_id' => $this->package->id,
+        'status' => 'active',
+        'end_date' => now()->addDays(30),
+    ]);
 
-        $this->assertEquals(-1, $this->service->getRemainingTabSpaceSlots($this->user));
-    }
+    $slots = $this->service->getTournamentSlots($this->user);
+    expect($slots)->toBe(10); // Should match package max_tournaments_per_tab
+});
 
-    public function package_with_unlimited_tournaments_returns_unlimited_slots()
-    {
-        $unlimitedPackage = Package::factory()->create([
-            'max_tab_spaces' => 5,
-            'max_tournaments_per_tab' => -1,
-        ]);
+test('package with unlimited tab spaces returns unlimited slots', function () {
+    $unlimitedPackage = Package::factory()->create([
+        'name' => 'Unlimited Package',
+        'max_tab_spaces' => -1, // -1 indicates unlimited
+        'max_tournaments_per_tab' => 10,
+    ]);
 
-        Subscription::factory()->create([
-            'user_id' => $this->user->id,
-            'package_id' => $unlimitedPackage->id,
-            'status' => 'active',
-            'end_date' => now()->addDays(30),
-        ]);
+    Subscription::factory()->create([
+        'user_id' => $this->user->id,
+        'package_id' => $unlimitedPackage->id,
+        'status' => 'active',
+        'end_date' => now()->addDays(30),
+    ]);
 
-        $this->assertEquals(-1, $this->service->getRemainingTournamentSlotsInTabSpace($this->user));
-    }
+    $slots = $this->service->getTabSpaceSlots($this->user);
+    expect($slots)->toBe(-1); // Should be unlimited
+});
 
-    public function get_user_limits_returns_correct_data_for_admin()
-    {
-        $limits = $this->service->getUserLimits($this->admin);
+test('package with unlimited tournaments returns unlimited slots', function () {
+    $unlimitedPackage = Package::factory()->create([
+        'name' => 'Unlimited Package',
+        'max_tab_spaces' => 5,
+        'max_tournaments_per_tab' => -1, // -1 indicates unlimited
+    ]);
 
-        $this->assertEquals([
-            'tab_spaces' => -1,
-            'tournaments_per_tab' => -1,
-            'remaining_tab_spaces' => -1,
-            'remaining_tournaments_per_tab' => -1,
-        ], $limits);
-    }
+    Subscription::factory()->create([
+        'user_id' => $this->user->id,
+        'package_id' => $unlimitedPackage->id,
+        'status' => 'active',
+        'end_date' => now()->addDays(30),
+    ]);
 
-    public function get_user_limits_returns_correct_data_for_user_without_subscription()
-    {
-        $limits = $this->service->getUserLimits($this->user);
+    $slots = $this->service->getTournamentSlots($this->user);
+    expect($slots)->toBe(-1); // Should be unlimited
+});
 
-        $this->assertEquals([
-            'tab_spaces' => 0,
-            'tournaments_per_tab' => 0,
-            'remaining_tab_spaces' => 0,
-            'remaining_tournaments_per_tab' => 0,
-        ], $limits);
-    }
+test('get user limits returns correct data for admin', function () {
+    $limits = $this->service->getUserLimits($this->admin);
 
-    public function get_user_limits_returns_correct_data_for_user_with_subscription()
-    {
-        Subscription::factory()->create([
-            'user_id' => $this->user->id,
-            'package_id' => $this->package->id,
-            'status' => 'active',
-            'end_date' => now()->addDays(30),
-        ]);
+    expect($limits)->toHaveKey('tab_spaces');
+    expect($limits)->toHaveKey('tournaments');
+    expect($limits['tab_spaces'])->toBe(-1); // Unlimited
+    expect($limits['tournaments'])->toBe(-1); // Unlimited
+});
 
-        $limits = $this->service->getUserLimits($this->user);
+test('get user limits returns correct data for user without subscription', function () {
+    $limits = $this->service->getUserLimits($this->user);
 
-        $this->assertEquals([
-            'tab_spaces' => 5,
-            'tournaments_per_tab' => 10,
-            'remaining_tab_spaces' => 5,
-            'remaining_tournaments_per_tab' => 10,
-        ], $limits);
-    }
+    expect($limits)->toHaveKey('tab_spaces');
+    expect($limits)->toHaveKey('tournaments');
+    expect($limits['tab_spaces'])->toBe(0);
+    expect($limits['tournaments'])->toBe(0);
+});
 
-    public function user_with_inactive_subscription_has_zero_slots()
-    {
-        Subscription::factory()->create([
-            'user_id' => $this->user->id,
-            'package_id' => $this->package->id,
-            'status' => 'inactive',
-            'end_date' => now()->addDays(30),
-        ]);
+test('get user limits returns correct data for user with subscription', function () {
+    // Create active subscription
+    Subscription::factory()->create([
+        'user_id' => $this->user->id,
+        'package_id' => $this->package->id,
+        'status' => 'active',
+        'end_date' => now()->addDays(30),
+    ]);
 
-        $this->assertEquals(0, $this->service->getRemainingTabSpaceSlots($this->user));
-        $this->assertEquals(0, $this->service->getRemainingTournamentSlotsInTabSpace($this->user));
-    }
-} 
+    $limits = $this->service->getUserLimits($this->user);
+
+    expect($limits)->toHaveKey('tab_spaces');
+    expect($limits)->toHaveKey('tournaments');
+    expect($limits['tab_spaces'])->toBe(5); // Should match package max_tab_spaces
+    expect($limits['tournaments'])->toBe(10); // Should match package max_tournaments_per_tab
+});
+
+test('user with inactive subscription has zero slots', function () {
+    // Create inactive subscription
+    Subscription::factory()->create([
+        'user_id' => $this->user->id,
+        'package_id' => $this->package->id,
+        'status' => 'inactive',
+        'end_date' => now()->addDays(30),
+    ]);
+
+    $tabSpaceSlots = $this->service->getTabSpaceSlots($this->user);
+    $tournamentSlots = $this->service->getTournamentSlots($this->user);
+
+    expect($tabSpaceSlots)->toBe(0);
+    expect($tournamentSlots)->toBe(0);
+}); 

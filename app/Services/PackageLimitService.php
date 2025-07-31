@@ -65,6 +65,46 @@ class PackageLimitService
     }
     
     /**
+     * Get tab space slots for user (total allowed)
+     */
+    public function getTabSpaceSlots(User $user): int
+    {
+        if ($user->is_admin) {
+            return -1; // Unlimited
+        }
+        
+        $activeSubscription = $user->activeSubscription();
+        
+        if (!$activeSubscription) {
+            return 0;
+        }
+        
+        $package = $activeSubscription->package;
+        
+        return $package->max_tab_spaces;
+    }
+    
+    /**
+     * Get tournament slots for user (total allowed per tab)
+     */
+    public function getTournamentSlots(User $user): int
+    {
+        if ($user->is_admin) {
+            return -1; // Unlimited
+        }
+        
+        $activeSubscription = $user->activeSubscription();
+        
+        if (!$activeSubscription) {
+            return 0;
+        }
+        
+        $package = $activeSubscription->package;
+        
+        return $package->max_tournaments_per_tab;
+    }
+    
+    /**
      * Get remaining tab space slots for user
      */
     public function getRemainingTabSpaceSlots(User $user): int
@@ -143,11 +183,15 @@ class PackageLimitService
         
         $package = $activeSubscription->package;
         
+        // Get current counts (placeholder for now)
+        $currentTabSpacesCount = 0; // $user->tabSpaces()->count();
+        $currentTournamentsCount = 0; // $user->tournaments()->count();
+        
         return [
             'tab_spaces' => $package->max_tab_spaces,
             'tournaments_per_tab' => $package->max_tournaments_per_tab,
-            'remaining_tab_spaces' => $this->getRemainingTabSpaceSlots($user),
-            'remaining_tournaments_per_tab' => $this->getRemainingTournamentSlotsInTabSpace($user),
+            'remaining_tab_spaces' => $package->max_tab_spaces === -1 ? -1 : max(0, $package->max_tab_spaces - $currentTabSpacesCount),
+            'remaining_tournaments_per_tab' => $package->max_tournaments_per_tab === -1 ? -1 : max(0, $package->max_tournaments_per_tab - $currentTournamentsCount),
         ];
     }
 } 
