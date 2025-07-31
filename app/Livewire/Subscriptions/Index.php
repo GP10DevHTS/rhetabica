@@ -26,5 +26,7 @@ class Index extends Component
         $subscription->delete();
         
         session()->flash('success', 'Subscription deleted successfully.');
+        
+        return redirect()->route('subscriptions.index');
     }
 } 

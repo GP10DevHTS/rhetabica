@@ -21,11 +21,11 @@
                 <span class="text-sm text-gray-900 dark:text-white">{{ $subscription->end_date->format('M d, Y') }}</span>
             </div>
             
-            @if($limits['tab_spaces'] !== -1)
+            @if(isset($limits['tab_spaces']) && $limits['tab_spaces'] !== -1)
                 <div class="flex justify-between items-center">
                     <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Tab Spaces:</span>
                     <span class="text-sm text-gray-900 dark:text-white">
-                        {{ $limits['remaining_tab_spaces'] }} of {{ $limits['tab_spaces'] }} remaining
+                        {{ $limits['remaining_tab_spaces'] ?? 0 }} of {{ $limits['tab_spaces'] }} remaining
                     </span>
                 </div>
             @else
@@ -35,11 +35,11 @@
                 </div>
             @endif
             
-            @if($limits['tournaments_per_tab'] !== -1)
+            @if(isset($limits['tournaments_per_tab']) && $limits['tournaments_per_tab'] !== -1)
                 <div class="flex justify-between items-center">
                     <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Tournaments per Tab:</span>
                     <span class="text-sm text-gray-900 dark:text-white">
-                        {{ $limits['remaining_tournaments_per_tab'] }} of {{ $limits['tournaments_per_tab'] }} remaining
+                        {{ $limits['remaining_tournaments_per_tab'] ?? 0 }} of {{ $limits['tournaments_per_tab'] }} remaining
                     </span>
                 </div>
             @else

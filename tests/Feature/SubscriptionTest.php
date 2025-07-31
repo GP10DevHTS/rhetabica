@@ -1,7 +1,5 @@
 <?php
 
-namespace Tests\Feature;
-
 use App\Livewire\Subscriptions\Index;
 use App\Livewire\Subscriptions\Create;
 use App\Livewire\Subscriptions\Edit;
@@ -9,264 +7,271 @@ use App\Livewire\Subscriptions\Show;
 use App\Models\Package;
 use App\Models\Subscription;
 use App\Models\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
-use Tests\TestCase;
 use Carbon\Carbon;
 
-class SubscriptionTest extends TestCase
-{
-    use RefreshDatabase;
-
-    protected User $admin;
-    protected User $user;
-    protected Package $package;
-
-    protected function setUp(): void
-    {
-        parent::setUp();
-        
-        $this->admin = User::factory()->admin()->create([
-            'email' => 'admin@rhetabica.net',
-            'password' => bcrypt('password'),
-        ]);
-        
-        $this->user = User::factory()->create([
-            'email' => 'user@rhetabica.com',
-            'password' => bcrypt('password'),
-        ]);
-
-        $this->package = Package::factory()->create([
-            'name' => 'Test Package',
-            'price' => 29.99,
-            'max_namespaces' => 5,
-            'max_tournaments' => 10,
-        ]);
-    }
-
+beforeEach(function () {
+    $this->admin = User::factory()->admin()->create([
+        'email' => 'admin@rhetabica.net',
+        'password' => bcrypt('password'),
+    ]);
     
-    public function admin_can_view_subscriptions_index()
-    {
-        $this->actingAs($this->admin);
+    $this->user = User::factory()->create([
+        'email' => 'user@rhetabica.com',
+        'password' => bcrypt('password'),
+    ]);
 
-        $response = $this->get(route('subscriptions.index'));
-        $response->assertStatus(200);
-        $response->assertSee('Subscription Management');
-    }
+    $this->package = Package::factory()->create([
+        'name' => 'Test Package',
+        'price' => 29.99,
+        'max_tab_spaces' => 5,
+        'max_tournaments_per_tab' => 10,
+    ]);
+});
 
-    
-    public function non_admin_cannot_view_subscriptions_index()
-    {
-        $this->actingAs($this->user);
+test('admin can view subscriptions index', function () {
+    $this->actingAs($this->admin);
 
-        $response = $this->get(route('subscriptions.index'));
-        $response->assertStatus(403);
-    }
+    $response = $this->get(route('subscriptions.index'));
+    $response->assertStatus(200);
+    $response->assertSee('Subscription Management');
+});
 
-    
-    public function admin_can_create_subscription()
-    {
-        $this->actingAs($this->admin);
+test('non admin cannot view subscriptions index', function () {
+    $this->actingAs($this->user);
 
-        $startDate = now();
-        $endDate = now()->addYear();
+    $response = $this->get(route('subscriptions.index'));
+    $response->assertStatus(403);
+});
 
-        Livewire::test(Create::class)
-            ->set('user_id', $this->user->id)
-            ->set('package_id', $this->package->id)
-            ->set('start_date', $startDate->format('Y-m-d\TH:i'))
-            ->set('end_date', $endDate->format('Y-m-d\TH:i'))
-            ->set('status', 'active')
-            ->call('save')
-            ->assertRedirect(route('subscriptions.index'));
+test('admin can create subscription', function () {
+    $this->actingAs($this->admin);
 
-        $this->assertDatabaseHas('subscriptions', [
-            'user_id' => $this->user->id,
-            'package_id' => $this->package->id,
-            'status' => 'active',
+    $startDate = now();
+    $endDate = now()->addYear();
+
+    Livewire::test(Create::class)
+        ->set('user_id', $this->user->id)
+        ->set('package_id', $this->package->id)
+        ->set('start_date', $startDate->format('Y-m-d\TH:i'))
+        ->set('end_date', $endDate->format('Y-m-d\TH:i'))
+        ->set('status', 'active')
+        ->call('save')
+        ->assertRedirect(route('subscriptions.index'));
+
+    $this->assertDatabaseHas('subscriptions', [
+        'user_id' => $this->user->id,
+        'package_id' => $this->package->id,
+        'status' => 'active',
+    ]);
+});
+
+test('subscription creation validates required fields', function () {
+    $this->actingAs($this->admin);
+
+    Livewire::test(Create::class)
+        ->set('user_id', '')
+        ->set('package_id', '')
+        ->set('start_date', '')
+        ->set('end_date', '')
+        ->call('save')
+        ->assertHasErrors([
+            'user_id' => 'required',
+            'package_id' => 'required',
+            'start_date' => 'required',
+            'end_date' => 'required',
         ]);
-    }
+});
 
-    
-    public function subscription_creation_validates_required_fields()
-    {
-        $this->actingAs($this->admin);
+test('subscription creation deactivates existing active subscriptions', function () {
+    $this->actingAs($this->admin);
 
-        Livewire::test(Create::class)
-            ->set('user_id', '')
-            ->set('package_id', '')
-            ->set('start_date', '')
-            ->set('end_date', '')
-            ->call('save')
-            ->assertHasErrors([
-                'user_id' => 'required',
-                'package_id' => 'required',
-                'start_date' => 'required',
-                'end_date' => 'required',
-            ]);
-    }
+    // Create an existing active subscription
+    $existingSubscription = Subscription::factory()->create([
+        'user_id' => $this->user->id,
+        'package_id' => $this->package->id,
+        'status' => 'active',
+        'start_date' => now()->subMonth(),
+        'end_date' => now()->addMonth(),
+    ]);
 
-    
-    public function subscription_creation_deactivates_existing_active_subscriptions()
-    {
-        $this->actingAs($this->admin);
+    $startDate = now();
+    $endDate = now()->addYear();
 
-        // Create an existing active subscription
-        $existingSubscription = Subscription::factory()->create([
-            'user_id' => $this->user->id,
-            'status' => 'active',
-        ]);
+    Livewire::test(Create::class)
+        ->set('user_id', $this->user->id)
+        ->set('package_id', $this->package->id)
+        ->set('start_date', $startDate->format('Y-m-d\TH:i'))
+        ->set('end_date', $endDate->format('Y-m-d\TH:i'))
+        ->set('status', 'active')
+        ->call('save')
+        ->assertRedirect(route('subscriptions.index'));
 
-        $startDate = now();
-        $endDate = now()->addYear();
+    // Check that the existing subscription was deactivated
+    $this->assertDatabaseHas('subscriptions', [
+        'id' => $existingSubscription->id,
+        'status' => 'inactive',
+    ]);
 
-        Livewire::test(Create::class)
-            ->set('user_id', $this->user->id)
-            ->set('package_id', $this->package->id)
-            ->set('start_date', $startDate->format('Y-m-d\TH:i'))
-            ->set('end_date', $endDate->format('Y-m-d\TH:i'))
-            ->set('status', 'active')
-            ->call('save');
+    // Check that the new subscription was created
+    $this->assertDatabaseHas('subscriptions', [
+        'user_id' => $this->user->id,
+        'package_id' => $this->package->id,
+        'status' => 'active',
+    ]);
+});
 
-        // Check that the existing subscription was deactivated
-        $this->assertDatabaseHas('subscriptions', [
-            'id' => $existingSubscription->id,
-            'status' => 'inactive',
-        ]);
+test('admin can edit subscription', function () {
+    $this->actingAs($this->admin);
 
-        // Check that the new subscription is active
-        $this->assertDatabaseHas('subscriptions', [
-            'user_id' => $this->user->id,
-            'package_id' => $this->package->id,
-            'status' => 'active',
-        ]);
-    }
+    $subscription = Subscription::factory()->create([
+        'user_id' => $this->user->id,
+        'package_id' => $this->package->id,
+        'status' => 'active',
+        'start_date' => now(),
+        'end_date' => now()->addMonth(),
+    ]);
 
-    
-    public function admin_can_edit_subscription()
-    {
-        $this->actingAs($this->admin);
+    $newEndDate = now()->addYear();
 
-        $subscription = Subscription::factory()->create([
-            'user_id' => $this->user->id,
-            'package_id' => $this->package->id,
-            'status' => 'active',
-        ]);
+    Livewire::test(Edit::class, ['subscription' => $subscription])
+        ->set('end_date', $newEndDate->format('Y-m-d\TH:i'))
+        ->set('status', 'inactive')
+        ->call('save')
+        ->assertRedirect(route('subscriptions.index'));
 
-        $newEndDate = now()->addMonths(6);
+    $this->assertDatabaseHas('subscriptions', [
+        'id' => $subscription->id,
+        'status' => 'inactive',
+    ]);
+});
 
-        Livewire::test(Edit::class, ['subscription' => $subscription])
-            ->set('end_date', $newEndDate->format('Y-m-d\TH:i'))
-            ->set('status', 'inactive')
-            ->call('save')
-            ->assertRedirect(route('subscriptions.index'));
+test('admin can delete subscription', function () {
+    $this->actingAs($this->admin);
 
-        $this->assertDatabaseHas('subscriptions', [
-            'id' => $subscription->id,
-            'status' => 'inactive',
-        ]);
-    }
+    $subscription = Subscription::factory()->create([
+        'user_id' => $this->user->id,
+        'package_id' => $this->package->id,
+    ]);
 
-    
-    public function admin_can_delete_subscription()
-    {
-        $this->actingAs($this->admin);
+    Livewire::test(Index::class)
+        ->call('deleteSubscription', $subscription->id)
+        ->assertRedirect(route('subscriptions.index'));
 
-        $subscription = Subscription::factory()->create();
+    $this->assertDatabaseMissing('subscriptions', ['id' => $subscription->id]);
+});
 
-        Livewire::test(Index::class)
-            ->call('deleteSubscription', $subscription->id);
+test('admin can extend subscription', function () {
+    $this->actingAs($this->admin);
 
-        $this->assertDatabaseMissing('subscriptions', ['id' => $subscription->id]);
-    }
+    $subscription = Subscription::factory()->create([
+        'user_id' => $this->user->id,
+        'package_id' => $this->package->id,
+        'status' => 'active',
+        'start_date' => now()->subMonth(),
+        'end_date' => now()->addDay(),
+    ]);
 
-    
-    public function admin_can_extend_subscription()
-    {
-        $this->actingAs($this->admin);
+    $newEndDate = now()->addYear();
 
-        $subscription = Subscription::factory()->create([
-            'end_date' => now()->addDays(30),
-        ]);
+    Livewire::test(Edit::class, ['subscription' => $subscription])
+        ->set('end_date', $newEndDate->format('Y-m-d\TH:i'))
+        ->call('save')
+        ->assertRedirect(route('subscriptions.index'));
 
-        Livewire::test(Show::class, ['subscription' => $subscription])
-            ->set('days', 60)
-            ->call('extendSubscription');
+    // The datetime-local input only captures minutes, so seconds will be 00
+    $expectedDate = $newEndDate->format('Y-m-d H:i') . ':00';
 
-        $this->assertDatabaseHas('subscriptions', [
-            'id' => $subscription->id,
-            'end_date' => $subscription->end_date->addDays(60),
-        ]);
-    }
+    $this->assertDatabaseHas('subscriptions', [
+        'id' => $subscription->id,
+        'end_date' => $expectedDate,
+    ]);
+});
 
-    
-    public function subscription_is_active_method_works()
-    {
-        $activeSubscription = Subscription::factory()->create([
-            'status' => 'active',
-            'end_date' => now()->addDays(30),
-        ]);
+test('subscription is active method works', function () {
+    $activeSubscription = Subscription::factory()->create([
+        'user_id' => $this->user->id,
+        'package_id' => $this->package->id,
+        'status' => 'active',
+        'start_date' => now()->subMonth(),
+        'end_date' => now()->addMonth(),
+    ]);
 
-        $expiredSubscription = Subscription::factory()->create([
-            'status' => 'active',
-            'end_date' => now()->subDays(30),
-        ]);
+    $inactiveSubscription = Subscription::factory()->create([
+        'user_id' => $this->user->id,
+        'package_id' => $this->package->id,
+        'status' => 'inactive',
+        'start_date' => now()->subMonth(),
+        'end_date' => now()->addMonth(),
+    ]);
 
-        $inactiveSubscription = Subscription::factory()->create([
-            'status' => 'inactive',
-            'end_date' => now()->addDays(30),
-        ]);
+    $expiredSubscription = Subscription::factory()->create([
+        'user_id' => $this->user->id,
+        'package_id' => $this->package->id,
+        'status' => 'active',
+        'start_date' => now()->subMonth(),
+        'end_date' => now()->subDay(),
+    ]);
 
-        $this->assertTrue($activeSubscription->isActive());
-        $this->assertFalse($expiredSubscription->isActive());
-        $this->assertFalse($inactiveSubscription->isActive());
-    }
+    expect($activeSubscription->isActive())->toBeTrue();
+    expect($inactiveSubscription->isActive())->toBeFalse();
+    expect($expiredSubscription->isActive())->toBeFalse();
+});
 
-    
-    public function subscription_is_expired_method_works()
-    {
-        $activeSubscription = Subscription::factory()->create([
-            'end_date' => now()->addDays(30),
-        ]);
+test('subscription is expired method works', function () {
+    $activeSubscription = Subscription::factory()->create([
+        'user_id' => $this->user->id,
+        'package_id' => $this->package->id,
+        'status' => 'active',
+        'start_date' => now()->subMonth(),
+        'end_date' => now()->addMonth(),
+    ]);
 
-        $expiredSubscription = Subscription::factory()->create([
-            'end_date' => now()->subDays(30),
-        ]);
+    $expiredSubscription = Subscription::factory()->create([
+        'user_id' => $this->user->id,
+        'package_id' => $this->package->id,
+        'status' => 'active',
+        'start_date' => now()->subMonth(),
+        'end_date' => now()->subDay(),
+    ]);
 
-        $this->assertFalse($activeSubscription->isExpired());
-        $this->assertTrue($expiredSubscription->isExpired());
-    }
+    expect($activeSubscription->isExpired())->toBeFalse();
+    expect($expiredSubscription->isExpired())->toBeTrue();
+});
 
-    
-    public function user_can_get_active_subscription()
-    {
-        $activeSubscription = Subscription::factory()->create([
-            'user_id' => $this->user->id,
-            'status' => 'active',
-            'end_date' => now()->addDays(30),
-        ]);
+test('user can get active subscription', function () {
+    $activeSubscription = Subscription::factory()->create([
+        'user_id' => $this->user->id,
+        'package_id' => $this->package->id,
+        'status' => 'active',
+        'start_date' => now()->subMonth(),
+        'end_date' => now()->addMonth(),
+    ]);
 
-        $inactiveSubscription = Subscription::factory()->create([
-            'user_id' => $this->user->id,
-            'status' => 'inactive',
-            'end_date' => now()->addDays(30),
-        ]);
+    $inactiveSubscription = Subscription::factory()->create([
+        'user_id' => $this->user->id,
+        'package_id' => $this->package->id,
+        'status' => 'inactive',
+        'start_date' => now()->subMonth(),
+        'end_date' => now()->addMonth(),
+    ]);
 
-        $activeSub = $this->user->activeSubscription();
+    $userActiveSubscription = $this->user->activeSubscription();
 
-        $this->assertEquals($activeSubscription->id, $activeSub->id);
-    }
+    expect($userActiveSubscription->id)->toBe($activeSubscription->id);
+    expect($userActiveSubscription->id)->not->toBe($inactiveSubscription->id);
+});
 
-    
-    public function user_without_active_subscription_returns_null()
-    {
-        $inactiveSubscription = Subscription::factory()->create([
-            'user_id' => $this->user->id,
-            'status' => 'inactive',
-        ]);
+test('user without active subscription returns null', function () {
+    $inactiveSubscription = Subscription::factory()->create([
+        'user_id' => $this->user->id,
+        'package_id' => $this->package->id,
+        'status' => 'inactive',
+        'start_date' => now()->subMonth(),
+        'end_date' => now()->addMonth(),
+    ]);
 
-        $activeSub = $this->user->activeSubscription();
+    $userActiveSubscription = $this->user->activeSubscription();
 
-        $this->assertNull($activeSub);
-    }
-} 
+    expect($userActiveSubscription)->toBeNull();
+}); 

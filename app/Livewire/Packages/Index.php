@@ -30,5 +30,7 @@ class Index extends Component
 
         $package->delete();
         session()->flash('success', 'Package deleted successfully.');
+        
+        return redirect()->route('packages.index');
     }
 } 

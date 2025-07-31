@@ -1,127 +1,105 @@
 <?php
 
-namespace Tests\Feature;
-
 use App\Http\Middleware\CheckSubscription;
 use App\Models\Package;
 use App\Models\Subscription;
 use App\Models\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Tests\TestCase;
 
-class CheckSubscriptionMiddlewareTest extends TestCase
-{
-    use RefreshDatabase;
+beforeEach(function () {
+    $this->middleware = new CheckSubscription();
+    
+    $this->admin = User::factory()->admin()->create([
+        'email' => 'admin@rhetabica.net',
+    ]);
+    
+    $this->user = User::factory()->create([
+        'email' => 'user@rhetabica.com',
+    ]);
 
-    protected CheckSubscription $middleware;
-    protected User $admin;
-    protected User $user;
-    protected Package $package;
+    $this->package = Package::factory()->create([
+        'name' => 'Test Package',
+        'max_tab_spaces' => 5,
+        'max_tournaments_per_tab' => 10,
+    ]);
+});
 
-    protected function setUp(): void
-    {
-        parent::setUp();
-        
-        $this->middleware = new CheckSubscription();
-        
-        $this->admin = User::factory()->admin()->create([
-            'email' => 'admin@rhetabica.net',
-        ]);
-        
-        $this->user = User::factory()->create([
-            'email' => 'user@rhetabica.com',
-        ]);
+test('admin can bypass subscription check', function () {
+    $request = Request::create('/test', 'GET');
+    $request->setUserResolver(fn () => $this->admin);
 
-        $this->package = Package::factory()->create([
-            'name' => 'Test Package',
-            'max_namespaces' => 5,
-            'max_tournaments' => 10,
-        ]);
-    }
+    $response = $this->middleware->handle($request, function ($request) {
+        return new Response('OK', 200);
+    });
 
-    public function admin_can_bypass_subscription_check()
-    {
-        $request = Request::create('/test', 'GET');
-        $request->setUserResolver(fn () => $this->admin);
+    expect($response->getStatusCode())->toBe(200);
+});
 
-        $response = $this->middleware->handle($request, function ($request) {
-            return new Response('OK', 200);
-        });
+test('user with active subscription can access', function () {
+    Subscription::factory()->create([
+        'user_id' => $this->user->id,
+        'package_id' => $this->package->id,
+        'status' => 'active',
+        'end_date' => now()->addDays(30),
+    ]);
 
-        $this->assertEquals(200, $response->getStatusCode());
-    }
+    $request = Request::create('/test', 'GET');
+    $request->setUserResolver(fn () => $this->user);
 
-    public function user_with_active_subscription_can_access()
-    {
-        Subscription::factory()->create([
-            'user_id' => $this->user->id,
-            'package_id' => $this->package->id,
-            'status' => 'active',
-            'end_date' => now()->addDays(30),
-        ]);
+    $response = $this->middleware->handle($request, function ($request) {
+        return new Response('OK', 200);
+    });
 
-        $request = Request::create('/test', 'GET');
-        $request->setUserResolver(fn () => $this->user);
+    expect($response->getStatusCode())->toBe(200);
+});
 
-        $response = $this->middleware->handle($request, function ($request) {
-            return new Response('OK', 200);
-        });
+test('user without subscription is redirected', function () {
+    $request = Request::create('/test', 'GET');
+    $request->setUserResolver(fn () => $this->user);
 
-        $this->assertEquals(200, $response->getStatusCode());
-    }
+    $response = $this->middleware->handle($request, function ($request) {
+        return new Response('OK', 200);
+    });
 
-    public function user_without_subscription_is_redirected()
-    {
-        $request = Request::create('/test', 'GET');
-        $request->setUserResolver(fn () => $this->user);
+    expect($response->getStatusCode())->toBe(302);
+    expect($response->getTargetUrl())->toContain('dashboard');
+});
 
-        $response = $this->middleware->handle($request, function ($request) {
-            return new Response('OK', 200);
-        });
+test('user with expired subscription is redirected', function () {
+    Subscription::factory()->create([
+        'user_id' => $this->user->id,
+        'package_id' => $this->package->id,
+        'status' => 'active',
+        'end_date' => now()->subDays(30),
+    ]);
 
-        $this->assertEquals(302, $response->getStatusCode());
-        $this->assertStringContainsString('dashboard', $response->getTargetUrl());
-    }
+    $request = Request::create('/test', 'GET');
+    $request->setUserResolver(fn () => $this->user);
 
-    public function user_with_expired_subscription_is_redirected()
-    {
-        Subscription::factory()->create([
-            'user_id' => $this->user->id,
-            'package_id' => $this->package->id,
-            'status' => 'active',
-            'end_date' => now()->subDays(30),
-        ]);
+    $response = $this->middleware->handle($request, function ($request) {
+        return new Response('OK', 200);
+    });
 
-        $request = Request::create('/test', 'GET');
-        $request->setUserResolver(fn () => $this->user);
+    expect($response->getStatusCode())->toBe(302);
+    expect($response->getTargetUrl())->toContain('dashboard');
+});
 
-        $response = $this->middleware->handle($request, function ($request) {
-            return new Response('OK', 200);
-        });
+test('user with inactive subscription is redirected', function () {
+    Subscription::factory()->create([
+        'user_id' => $this->user->id,
+        'package_id' => $this->package->id,
+        'status' => 'inactive',
+        'end_date' => now()->addDays(30),
+    ]);
 
-        $this->assertEquals(302, $response->getStatusCode());
-        $this->assertStringContainsString('dashboard', $response->getTargetUrl());
-    }
+    $request = Request::create('/test', 'GET');
+    $request->setUserResolver(fn () => $this->user);
 
-    public function user_with_inactive_subscription_is_redirected()
-    {
-        Subscription::factory()->create([
-            'user_id' => $this->user->id,
-            'package_id' => $this->package->id,
-            'status' => 'inactive',
-            'end_date' => now()->addDays(30),
-        ]);
+    $response = $this->middleware->handle($request, function ($request) {
+        return new Response('OK', 200);
+    });
 
-        $request = Request::create('/test', 'GET');
-        $request->setUserResolver(fn () => $this->user);
-
-        $response = $this->middleware->handle($request, function ($request) {
-            return new Response('OK', 200);
-        });
-
-        $this->assertEquals(302, $response->getStatusCode());
-        $this->assertStringContainsString('dashboard', $response->getTargetUrl());
-    }
-} 
+    expect($response->getStatusCode())->toBe(302);
+    expect($response->getTargetUrl())->toContain('dashboard');
+}); 
