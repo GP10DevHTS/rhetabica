@@ -6,6 +6,11 @@ use App\Models\User;
 
 class PackageLimitService
 {
+    public function hasReachedTabspaceLimit(User $user): bool
+    {
+        return !$this->canCreateTabSpace($user);
+    }
+
     /**
      * Check if user can create more tab spaces
      */
@@ -29,8 +34,8 @@ class PackageLimitService
             return true;
         }
         
-        // Count current tab spaces (you'll need to implement this when you create the TabSpace model)
-        $currentTabSpacesCount = 0; // $user->tabSpaces()->count();
+        // Count current tab spaces
+        $currentTabSpacesCount = $user->tabspaces()->count();
         
         return $currentTabSpacesCount < $package->max_tab_spaces;
     }
@@ -125,7 +130,7 @@ class PackageLimitService
             return -1; // Unlimited
         }
         
-        $currentTabSpacesCount = 0; // $user->tabSpaces()->count();
+        $currentTabSpacesCount = $user->tabspaces()->count();
         
         return max(0, $package->max_tab_spaces - $currentTabSpacesCount);
     }
@@ -183,8 +188,8 @@ class PackageLimitService
         
         $package = $activeSubscription->package;
         
-        // Get current counts (placeholder for now)
-        $currentTabSpacesCount = 0; // $user->tabSpaces()->count();
+        // Get current counts
+        $currentTabSpacesCount = $user->tabspaces()->count();
         $currentTournamentsCount = 0; // $user->tournaments()->count();
         
         return [

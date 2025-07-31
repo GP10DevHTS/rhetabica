@@ -87,6 +87,14 @@ class User extends Authenticatable
     }
 
     /**
+     * Get the user's tabspaces.
+     */
+    public function tabspaces(): HasMany
+    {
+        return $this->hasMany(Tabspace::class);
+    }
+
+    /**
      * Get the user's active subscription.
      */
     public function activeSubscription()
