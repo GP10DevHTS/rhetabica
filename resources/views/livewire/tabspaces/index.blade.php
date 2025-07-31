@@ -3,35 +3,37 @@
         <div class="flex justify-between items-center">
             <h1 class="text-2xl font-semibold text-gray-900 dark:text-white">Tabspaces</h1>
 
-            <flux:modal.trigger name="create-tabspace-modal">
-                <flux:button variant="primary">Create Tabspace</flux:button>
-            </flux:modal.trigger>
+            <div>
+                <flux:modal.trigger name="create-tabspace-modal">
+                    <flux:button variant="primary">Create Tabspace</flux:button>
+                </flux:modal.trigger>
 
-            <flux:modal name="create-tabspace-modal" title="Create Tabspace">
-                <section class="w-full">
-                    <form wire:submit="save" class="my-6 w-full space-y-6">
-                        @if (session('limit-reached'))
-                            <div class="p-4 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400"
-                                role="alert">
-                                {{ session('limit-reached') }}
+                <flux:modal name="create-tabspace-modal" variant="flyout" title="Create Tabspace">
+                    <section class="w-full">
+                        <form wire:submit="save" class="my-6 w-full space-y-6">
+                            @if (session('limit-reached'))
+                                <div class="p-4 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400"
+                                    role="alert">
+                                    {{ session('limit-reached') }}
+                                </div>
+                            @endif
+
+                            <flux:input wire:model="name" :label="__('Tabspace Name')" type="text" required autofocus
+                                autocomplete="off" />
+                            <flux:textarea wire:model="context" :label="__('Tabspace Context')" type="text" required
+                                autofocus autocomplete="off" />
+
+                            <flux:spacer />
+                            <div class="flex items-center gap-4">
+                                <div class="flex items-center justify-end">
+                                    <flux:button variant="primary" type="submit" class="w-full">{{ __('Create') }}
+                                    </flux:button>
+                                </div>
                             </div>
-                        @endif
-
-                        <flux:input wire:model="name" :label="__('Tabspace Name')" type="text" required autofocus
-                            autocomplete="off" />
-                        <flux:textarea wire:model="context" :label="__('Tabspace Context')" type="text" required
-                            autofocus autocomplete="off" />
-
-                        <flux:spacer />
-                        <div class="flex items-center gap-4">
-                            <div class="flex items-center justify-end">
-                                <flux:button variant="primary" type="submit" class="w-full">{{ __('Create') }}
-                                </flux:button>
-                            </div>
-                        </div>
-                    </form>
-                </section>
-            </flux:modal>
+                        </form>
+                    </section>
+                </flux:modal>
+            </div>
         </div>
 
         <div class="mt-8 flow-root">
@@ -61,7 +63,8 @@
                                         </td>
                                         <td
                                             class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
-                                            <flux:button href="{{ route('tabspaces.show', $tabspace->slug) }}" icon:trailing="arrow-up-right">
+                                            <flux:button href="{{ route('tabspaces.show', $tabspace->slug) }}"
+                                                icon:trailing="arrow-up-right">
                                                 Details
                                             </flux:button>
                                         </td>

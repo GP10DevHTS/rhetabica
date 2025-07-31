@@ -14,10 +14,9 @@
             </div>
 
             <div class="mt-6">
-                <a href="{{ route('tabspaces.index') }}"
-                    class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-                    ← Back to Tabspaces
-                </a>
+                <flux:button href="{{ route('tabspaces.index') }}" icon="arrow-left">
+                    Back to Tabspaces
+                </flux:button>
             </div>
         </div>
     </div>
