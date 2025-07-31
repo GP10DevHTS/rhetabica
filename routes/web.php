@@ -22,7 +22,7 @@ Route::middleware(['auth'])->group(function () {
 
     // Tabspace routes
     Route::get('tabspaces', \App\Livewire\Tabspaces\Index::class)->name('tabspaces.index');
-    Route::get('tabspaces/create', \App\Livewire\Tabspaces\Create::class)->name('tabspaces.create');
+    Route::get('tabspaces/{tabspace:slug}', \App\Livewire\Tabspaces\Show::class)->name('tabspaces.show');
 });
 
 // Admin-only routes for package and subscription management
