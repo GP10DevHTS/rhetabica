@@ -1,0 +1,24 @@
+<div>
+    {{-- Nothing in the world is as soft and yielding as water. --}}
+    <div class=" mx-auto py-4">
+
+        <div class="flex justify-between mb-6">
+            <div class="mt-6">
+                <h1 class="text-3xl font-bold text-gray-900 dark:text-white">
+                    {{ $tabspace->name }}
+                </h1>
+
+                <p class="mt-4 text-gray-700 dark:text-gray-300 whitespace-pre-line">
+                    {{ $tabspace->context }}
+                </p>
+            </div>
+
+            <div class="mt-6">
+                <flux:button href="{{ route('tabspaces.index') }}" icon="arrow-left">
+                    Back to Tabspaces
+                </flux:button>
+            </div>
+        </div>
+    </div>
+
+</div>
