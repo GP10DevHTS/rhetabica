@@ -158,7 +158,7 @@ test('admin can delete subscription', function () {
         ->call('deleteSubscription', $subscription->id)
         ->assertRedirect(route('subscriptions.index'));
 
-    $this->assertDatabaseMissing('subscriptions', ['id' => $subscription->id]);
+    $this->assertSoftDeleted('subscriptions', ['id' => $subscription->id]);
 });
 
 test('admin can extend subscription', function () {
