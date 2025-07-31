@@ -117,7 +117,7 @@ test('admin can delete package without active subscriptions', function () {
         ->call('deletePackage', $package->id)
         ->assertRedirect(route('packages.index'));
 
-    $this->assertDatabaseMissing('packages', ['id' => $package->id]);
+    $this->assertSoftDeleted('packages', ['id' => $package->id]);
 });
 
 test('admin cannot delete package with active subscriptions', function () {

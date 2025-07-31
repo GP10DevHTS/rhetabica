@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('packages', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();
             $table->string('name');
             $table->text('description')->nullable();
                                     $table->decimal('price', 10, 2)->default(0);
@@ -20,6 +20,7 @@ return new class extends Migration
                         $table->integer('max_tournaments_per_tab')->default(5);
                         $table->boolean('is_active')->default(true);
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 
