@@ -63,10 +63,15 @@
                                         </td>
                                         <td
                                             class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
-                                            <flux:button href="{{ route('tabspaces.show', $tabspace->slug) }}"
-                                                icon:trailing="arrow-up-right">
-                                                Details
-                                            </flux:button>
+                                            <div class="flex space-x-2 justify-end">
+                                                <flux:button wire:click="edit({{ $tabspace->id }})" icon="pencil">
+                                                    Edit
+                                                </flux:button>
+                                                <flux:button href="{{ route('tabspaces.show', $tabspace->slug) }}"
+                                                    icon:trailing="arrow-up-right">
+                                                    Details
+                                                </flux:button>
+                                            </div>
                                         </td>
                                     </tr>
                                 @empty
@@ -84,5 +89,26 @@
                 </div>
             </div>
         </div>
+
+        <!-- Edit Modal -->
+        <flux:modal name="edit-tabspace-modal" variant="flyout" title="Edit Tabspace">
+            <section class="w-full">
+                <form wire:submit="update" class="my-6 w-full space-y-6">
+                    <flux:input wire:model="name" :label="__('Tabspace Name')" type="text" required autofocus
+                        autocomplete="off" />
+
+                    <flux:textarea wire:model="context" :label="__('Tabspace Context')" type="text" required
+                        autofocus autocomplete="off" />
+
+                    <flux:spacer />
+                    <div class="flex items-center gap-4">
+                        <div class="flex items-center justify-end">
+                            <flux:button variant="primary" type="submit" class="w-full">{{ __('Update') }}
+                            </flux:button>
+                        </div>
+                    </div>
+                </form>
+            </section>
+        </flux:modal>
     </div>
 </div>

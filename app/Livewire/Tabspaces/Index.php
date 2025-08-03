@@ -11,9 +11,37 @@ use App\Services\PackageLimitService;
 
 class Index extends Component
 {
-
      public string $name = '';
      public string $context = '';
+     public ?Tabspace $editingTabspace = null;
+
+    public function edit(Tabspace $tabspace)
+    {
+        $this->editingTabspace = $tabspace;
+        $this->name = $tabspace->name;
+        $this->context = $tabspace->context ?? '';
+        Flux::modal('edit-tabspace-modal')->show();
+    }
+
+    public function update()
+    {
+        if (!Auth::check() || !$this->editingTabspace) {
+            return abort(403);
+        }
+
+        $this->validate([
+            'name' => ['required', 'string', 'max:255', Rule::unique('tabspaces')->where('user_id', Auth::id())->ignore($this->editingTabspace->id)],
+            'context' => ['sometimes', 'nullable', 'max:1000'],
+        ]);
+
+        $this->editingTabspace->update([
+            'name' => $this->name,
+            'context' => $this->context,
+        ]);
+
+        Flux::modals()->close();
+        $this->reset('name', 'context', 'editingTabspace');
+    }
 
     public function save()
     {
