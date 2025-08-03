@@ -29,7 +29,8 @@ class Tabspace extends Model
         parent::boot();
 
         static::creating(function ($model) {
-            $model->user_id = Auth::id();
+            if(Auth::check())
+                $model->user_id = Auth::id();
 
             $baseSlug = Str::slug($model->name);
             $slug = $baseSlug;

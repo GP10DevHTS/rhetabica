@@ -1,10 +1,11 @@
 <?php
 
-use App\Models\Package;
 use App\Models\User;
-use App\Models\Tabspace;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
+use App\Models\Package;
+use App\Models\Tabspace;
+use Illuminate\Support\Str;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
@@ -13,14 +14,14 @@ beforeEach(function () {
         'email' => 'admin@rhetabica.net',
         'password' => bcrypt('password'),
     ]);
-    
+
     $this->user = User::factory()->create([
         'email' => 'user@rhetabica.com',
         'password' => bcrypt('password'),
     ]);
 
     $this->package = Package::factory()->create([
-        'name' => 'Test Package',
+        'name' => 'Free',
         'price' => 29.99,
         'max_tab_spaces' => 5,
         'max_tournaments_per_tab' => 10,
@@ -28,21 +29,31 @@ beforeEach(function () {
 });
 
 test('a user can create a tabspace', function () {
-    $user = User::factory()->create();
-    $this->actingAs($user);
+    // Ensure user has an active subscription
+    $this->user->subscriptions()->create([
+        'package_id' => $this->package->id,
+        'status' => 'active',
+        'start_date' => now(),
+        'end_date' => now()->addDays(30),
+    ]);
 
-    Livewire::test('tabspaces.index')
-        ->set('name', 'My First Tabspace')
+    $this->actingAs($this->user);
+
+    $tabspaceName = Str::random(10) . ' tabspace';
+
+    Livewire::actingAs($this->user)
+        ->test('tabspaces.index')
+        ->set('name', $tabspaceName)
         ->call('save');
 
     $this->assertDatabaseHas('tabspaces', [
-        'user_id' => $user->id,
-        'name' => 'My First Tabspace',
+        'user_id' => $this->user->id,
+        'name' => $tabspaceName,
     ]);
 });
 
 test('a user cannot create a tabspace if they have reached their limit', function () {
-    $user = User::factory()->create();
+    $user = $this->user;
     $user->subscriptions()->delete();
     $package = Package::factory()->create(['max_tab_spaces' => 1]);
     $user->subscriptions()->create([
@@ -51,27 +62,46 @@ test('a user cannot create a tabspace if they have reached their limit', functio
         'start_date' => now(),
         'end_date' => now()->addDays(30),
     ]);
-    Tabspace::factory()->create(['user_id' => $user->id]);
-
+ 
     $this->actingAs($user);
+    $tabspaceName = Str::random(10) . ' tabspace';
+     Livewire::actingAs($this->user)
+        ->test('tabspaces.index')
+        ->set('name', $tabspaceName)
+        ->call('save');
 
-    Livewire::test('tabspaces.index')
+    $this->assertDatabaseHas('tabspaces', [
+        'user_id' => $this->user->id,
+        'name' => $tabspaceName,
+    ]);
+
+    Livewire::actingAs($this->user)
+        ->test('tabspaces.index')
         ->set('name', 'My Second Tabspace')
         ->call('save')
         ->assertSessionHas('limit-reached');
 
     $this->assertDatabaseMissing('tabspaces', [
-        'user_id' => $user->id,
+        'user_id' => $this->user->id,
         'name' => 'My Second Tabspace',
     ]);
 });
 
 test('a user cannot create a tabspace with a name that is already taken', function () {
     $user = User::factory()->create();
+    // Give user a subscription to ensure they can create tabspaces
+    $user->subscriptions()->create([
+        'package_id' => $this->package->id,
+        'status' => 'active',
+        'start_date' => now(),
+        'end_date' => now()->addDays(30),
+    ]);
+
     Tabspace::factory()->create(['user_id' => $user->id, 'name' => 'My First Tabspace']);
     $this->actingAs($user);
 
-    Livewire::test('tabspaces.index')
+    Livewire::actingAs($user)
+        ->test('tabspaces.index')
         ->set('name', 'My First Tabspace')
         ->call('save')
         ->assertHasErrors(['name' => 'unique']);

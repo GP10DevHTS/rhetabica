@@ -34,6 +34,7 @@ class Index extends Component
         ]);
 
         Tabspace::create([
+            'user_id' => Auth::id(),
             'name' => $this->name,
             'context' => $this->context,
         ]);
@@ -48,7 +49,7 @@ class Index extends Component
 
     public function render()
     {
-        
+
         return view('livewire.tabspaces.index',[
             'tabspaces' => Auth::user()
         ->tabspaces()
