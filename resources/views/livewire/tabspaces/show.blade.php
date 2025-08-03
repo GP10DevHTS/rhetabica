@@ -21,4 +21,7 @@
         </div>
     </div>
 
+    <div class="mt-12 border-t border-gray-200 dark:border-gray-700 pt-8">
+        <livewire:tabspaces.tournament-list :tabspace="$tabspace" />
+    </div>
 </div>

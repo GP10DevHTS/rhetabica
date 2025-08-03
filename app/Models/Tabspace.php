@@ -24,6 +24,11 @@ class Tabspace extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function tournaments()
+    {
+        return $this->hasMany(Tournament::class);
+    }
+
     protected static function boot()
     {
         parent::boot();
