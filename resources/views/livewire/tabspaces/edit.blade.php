@@ -20,8 +20,8 @@
             </div>
 
             <div class="flex items-center gap-4">
-                <flux:button type="submit">Create Tabspace</flux:button>
-                <flux:button href="{{ route('tabspaces.index') }}" variant="secondary">Cancel</flux:button>
+                <flux:button type="submit">Save Changes</flux:button>
+                <flux:button href="{{ route('tabspaces.show', $tabspace) }}" variant="secondary">Cancel</flux:button>
             </div>
         </form>
     </div>

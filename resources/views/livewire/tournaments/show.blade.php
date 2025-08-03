@@ -17,7 +17,12 @@
                 </div>
             </div>
 
-            <div class="mt-6">
+            <div class="mt-6 space-x-4">
+                @if(Auth::id() === $tournament->user_id || Auth::user()->is_admin)
+                    <flux:button wire:click="togglePublic" icon="{{ $tournament->is_public ? 'eye-slash' : 'eye' }}">
+                        {{ $tournament->is_public ? 'Make Private' : 'Make Public' }}
+                    </flux:button>
+                @endif
                 <flux:button href="{{ route('tabspaces.show', $tournament->tabspace->slug) }}" icon="arrow-left">
                     Back to Tabspace
                 </flux:button>

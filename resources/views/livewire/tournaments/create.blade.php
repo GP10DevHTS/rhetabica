@@ -8,20 +8,20 @@
             </div>
 
             <div>
-                <flux:input-label for="context" value="Context" />
-                <flux:textarea wire:model="context" id="context" class="mt-1 block w-full" rows="6" required />
-                <flux:input-error :messages="$errors->get('context')" class="mt-2" />
+                <flux:input-label for="description" value="Description" />
+                <flux:textarea wire:model="description" id="description" class="mt-1 block w-full" rows="6" />
+                <flux:input-error :messages="$errors->get('description')" class="mt-2" />
             </div>
 
             <div class="flex items-center gap-4">
                 <flux:checkbox wire:model="is_public" id="is_public" />
-                <flux:input-label for="is_public" value="Make this tabspace public" />
+                <flux:input-label for="is_public" value="Make this tournament public" />
                 <flux:input-error :messages="$errors->get('is_public')" class="mt-2" />
             </div>
 
             <div class="flex items-center gap-4">
-                <flux:button type="submit">Create Tabspace</flux:button>
-                <flux:button href="{{ route('tabspaces.index') }}" variant="secondary">Cancel</flux:button>
+                <flux:button type="submit">Create Tournament</flux:button>
+                <flux:button href="{{ route('tabspaces.show', ['tabspace' => $tabspaceId]) }}" variant="secondary">Cancel</flux:button>
             </div>
         </form>
     </div>

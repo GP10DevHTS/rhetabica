@@ -3,6 +3,7 @@
 namespace App\Livewire\Tournaments;
 
 use App\Models\Tournament;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -14,8 +15,13 @@ class Explore extends Component
 
     public function render()
     {
-        $tournaments = Tournament::where('is_public', true)
-            ->when($this->search, function($query) {
+        $query = Tournament::query();
+
+        if (!Auth::check() || !Auth::user()->is_admin) {
+            $query->where('is_public', true);
+        }
+
+        $tournaments = $query->when($this->search, function($query) {
                 $query->where('name', 'like', '%' . $this->search . '%')
                     ->orWhere('description', 'like', '%' . $this->search . '%');
             })

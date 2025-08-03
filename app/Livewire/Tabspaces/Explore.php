@@ -3,6 +3,7 @@
 namespace App\Livewire\Tabspaces;
 
 use App\Models\Tabspace;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -14,8 +15,13 @@ class Explore extends Component
 
     public function render()
     {
-        $tabspaces = Tabspace::where('is_public', true)
-            ->when($this->search, function($query) {
+        $query = Tabspace::query();
+
+        if (!Auth::check() || !Auth::user()->is_admin) {
+            $query->where('is_public', true);
+        }
+
+        $tabspaces = $query->when($this->search, function($query) {
                 $query->where('name', 'like', '%' . $this->search . '%')
                     ->orWhere('context', 'like', '%' . $this->search . '%');
             })

@@ -13,6 +13,7 @@ class Index extends Component
 {
      public string $name = '';
      public string $context = '';
+     public bool $is_public = false;
      public ?Tabspace $editingTabspace = null;
 
     public function edit(Tabspace $tabspace)
@@ -20,6 +21,7 @@ class Index extends Component
         $this->editingTabspace = $tabspace;
         $this->name = $tabspace->name;
         $this->context = $tabspace->context ?? '';
+        $this->is_public = $tabspace->is_public;
         Flux::modal('edit-tabspace-modal')->show();
     }
 
@@ -32,15 +34,17 @@ class Index extends Component
         $this->validate([
             'name' => ['required', 'string', 'max:255', Rule::unique('tabspaces')->where('user_id', Auth::id())->ignore($this->editingTabspace->id)],
             'context' => ['sometimes', 'nullable', 'max:1000'],
+            'is_public' => ['boolean'],
         ]);
 
         $this->editingTabspace->update([
             'name' => $this->name,
             'context' => $this->context,
+            'is_public' => $this->is_public,
         ]);
 
         Flux::modals()->close();
-        $this->reset('name', 'context', 'editingTabspace');
+        $this->reset('name', 'context', 'is_public', 'editingTabspace');
     }
 
     public function save()
@@ -59,12 +63,14 @@ class Index extends Component
         $this->validate([
             'name' => ['required', 'string', 'max:255', Rule::unique('tabspaces')->where('user_id', Auth::id())],
             'context' => ['sometimes', 'nullable', 'max:1000'],
+            'is_public' => ['boolean'],
         ]);
 
         Tabspace::create([
             'user_id' => Auth::id(),
             'name' => $this->name,
             'context' => $this->context,
+            'is_public' => $this->is_public,
         ]);
 
         Flux::modals()->close();
