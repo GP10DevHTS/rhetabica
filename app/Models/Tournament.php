@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
 class Tournament extends Model
@@ -15,7 +16,28 @@ class Tournament extends Model
         'description',
         'tabspace_id',
         'user_id',
+        'is_public',
     ];
+
+    public function scopeVisibleTo($query, $user = null)
+    {
+        if (!$user) {
+            $user = Auth::user();
+        }
+
+        if (!$user || (!$user->is_admin && $user->id !== $this->user_id)) {
+            $query->where('is_public', true);
+        }
+
+        if ($user && !$user->is_admin) {
+            $query->where(function($q) use ($user) {
+                $q->where('is_public', true)
+                  ->orWhere('user_id', $user->id);
+            });
+        }
+
+        return $query;
+    }
 
     protected static function boot()
     {

@@ -13,6 +13,10 @@ Route::view('dashboard', 'dashboard')
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
 
+// Public routes for browsing public tabspaces and tournaments
+Route::get('explore/tabspaces', \App\Livewire\Tabspaces\Explore::class)->name('tabspaces.explore');
+Route::get('explore/tournaments', \App\Livewire\Tournaments\Explore::class)->name('tournaments.explore');
+
 Route::middleware(['auth'])->group(function () {
     Route::redirect('settings', 'settings/profile');
 
