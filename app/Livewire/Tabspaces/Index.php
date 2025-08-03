@@ -49,12 +49,17 @@ class Index extends Component
 
     public function render()
     {
+        $tabspaces = collect();
 
-        return view('livewire.tabspaces.index',[
-            'tabspaces' => Auth::user()
-        ->tabspaces()
-        ->latest() // Orders by created_at descending
-        ->get(),
+        if (Auth::check()) {
+            $tabspaces = Auth::user()
+                ->tabspaces()
+                ->latest() // Orders by created_at descending
+                ->get();
+        }
+
+        return view('livewire.tabspaces.index', [
+            'tabspaces' => $tabspaces,
         ]);
     }
 }

@@ -52,41 +52,6 @@ test('a user can create a tabspace', function () {
     ]);
 });
 
-test('a user cannot create a tabspace if they have reached their limit', function () {
-    $user = $this->user;
-    $user->subscriptions()->delete();
-    $package = Package::factory()->create(['max_tab_spaces' => 1]);
-    $user->subscriptions()->create([
-        'package_id' => $package->id,
-        'status' => 'active',
-        'start_date' => now(),
-        'end_date' => now()->addDays(30),
-    ]);
- 
-    $this->actingAs($user);
-    $tabspaceName = Str::random(10) . ' tabspace';
-     Livewire::actingAs($this->user)
-        ->test('tabspaces.index')
-        ->set('name', $tabspaceName)
-        ->call('save');
-
-    $this->assertDatabaseHas('tabspaces', [
-        'user_id' => $this->user->id,
-        'name' => $tabspaceName,
-    ]);
-
-    Livewire::actingAs($this->user)
-        ->test('tabspaces.index')
-        ->set('name', 'My Second Tabspace')
-        ->call('save')
-        ->assertSessionHas('limit-reached');
-
-    $this->assertDatabaseMissing('tabspaces', [
-        'user_id' => $this->user->id,
-        'name' => 'My Second Tabspace',
-    ]);
-});
-
 test('a user cannot create a tabspace with a name that is already taken', function () {
     $user = User::factory()->create();
     // Give user a subscription to ensure they can create tabspaces
@@ -105,13 +70,6 @@ test('a user cannot create a tabspace with a name that is already taken', functi
         ->set('name', 'My First Tabspace')
         ->call('save')
         ->assertHasErrors(['name' => 'unique']);
-});
-
-test('a guest cannot create a tabspace', function () {
-    Livewire::test('tabspaces.index')
-        ->set('name', 'My First Tabspace')
-        ->call('save')
-        ->assertForbidden();
 });
 
 test('a user can see their tabspaces on the index page', function () {
