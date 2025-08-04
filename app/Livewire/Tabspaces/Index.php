@@ -11,9 +11,41 @@ use App\Services\PackageLimitService;
 
 class Index extends Component
 {
-
      public string $name = '';
      public string $context = '';
+     public bool $is_public = false;
+     public ?Tabspace $editingTabspace = null;
+
+    public function edit(Tabspace $tabspace)
+    {
+        $this->editingTabspace = $tabspace;
+        $this->name = $tabspace->name;
+        $this->context = $tabspace->context ?? '';
+        $this->is_public = $tabspace->is_public;
+        Flux::modal('edit-tabspace-modal')->show();
+    }
+
+    public function update()
+    {
+        if (!Auth::check() || !$this->editingTabspace) {
+            return abort(403);
+        }
+
+        $this->validate([
+            'name' => ['required', 'string', 'max:255', Rule::unique('tabspaces')->where('user_id', Auth::id())->ignore($this->editingTabspace->id)],
+            'context' => ['sometimes', 'nullable', 'max:1000'],
+            'is_public' => ['boolean'],
+        ]);
+
+        $this->editingTabspace->update([
+            'name' => $this->name,
+            'context' => $this->context,
+            'is_public' => $this->is_public,
+        ]);
+
+        Flux::modals()->close();
+        $this->reset('name', 'context', 'is_public', 'editingTabspace');
+    }
 
     public function save()
     {
@@ -31,11 +63,14 @@ class Index extends Component
         $this->validate([
             'name' => ['required', 'string', 'max:255', Rule::unique('tabspaces')->where('user_id', Auth::id())],
             'context' => ['sometimes', 'nullable', 'max:1000'],
+            'is_public' => ['boolean'],
         ]);
 
         Tabspace::create([
+            'user_id' => Auth::id(),
             'name' => $this->name,
             'context' => $this->context,
+            'is_public' => $this->is_public,
         ]);
 
         Flux::modals()->close();
@@ -48,12 +83,17 @@ class Index extends Component
 
     public function render()
     {
-        
-        return view('livewire.tabspaces.index',[
-            'tabspaces' => Auth::user()
-        ->tabspaces()
-        ->latest() // Orders by created_at descending
-        ->get(),
+        $tabspaces = collect();
+
+        if (Auth::check()) {
+            $tabspaces = Auth::user()
+                ->tabspaces()
+                ->latest() // Orders by created_at descending
+                ->get();
+        }
+
+        return view('livewire.tabspaces.index', [
+            'tabspaces' => $tabspaces,
         ]);
     }
 }

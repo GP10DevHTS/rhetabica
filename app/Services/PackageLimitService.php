@@ -20,26 +20,26 @@ class PackageLimitService
         if ($user->is_admin) {
             return true;
         }
-        
+
         $activeSubscription = $user->activeSubscription();
-        
+
         if (!$activeSubscription) {
             return false;
         }
-        
+
         $package = $activeSubscription->package;
-        
+
         // Unlimited tab spaces
         if ($package->max_tab_spaces === -1) {
             return true;
         }
-        
+
         // Count current tab spaces
         $currentTabSpacesCount = $user->tabspaces()->count();
-        
+
         return $currentTabSpacesCount < $package->max_tab_spaces;
     }
-    
+
     /**
      * Check if user can create more tournaments in a specific tab space
      */
@@ -49,26 +49,33 @@ class PackageLimitService
         if ($user->is_admin) {
             return true;
         }
-        
+
         $activeSubscription = $user->activeSubscription();
-        
+
         if (!$activeSubscription) {
             return false;
         }
-        
+
         $package = $activeSubscription->package;
-        
-        // Unlimited tournaments per tab
-        if ($package->max_tournaments_per_tab === -1) {
+
+        // Unlimited tournaments
+        if ($package->max_tournaments_per_tabspace === -1) {
             return true;
         }
-        
-        // Count current tournaments in this tab space (you'll need to implement this when you create the Tournament model)
-        $currentTournamentsCount = 0; // $user->tournaments()->where('tab_space_id', $tabSpaceId)->count();
-        
+
+        // If no tabspace is specified, user can create tournaments
+        if (!$tabSpaceId) {
+            return true;
+        }
+
+        // Count current tournaments in the tabspace
+        $currentTournamentsCount = $user->tabspaces()->findOrFail($tabSpaceId)
+            ->tournaments()
+            ->count();
+
         return $currentTournamentsCount < $package->max_tournaments_per_tab;
     }
-    
+
     /**
      * Get tab space slots for user (total allowed)
      */
@@ -77,18 +84,18 @@ class PackageLimitService
         if ($user->is_admin) {
             return -1; // Unlimited
         }
-        
+
         $activeSubscription = $user->activeSubscription();
-        
+
         if (!$activeSubscription) {
             return 0;
         }
-        
+
         $package = $activeSubscription->package;
-        
+
         return $package->max_tab_spaces;
     }
-    
+
     /**
      * Get tournament slots for user (total allowed per tab)
      */
@@ -97,18 +104,18 @@ class PackageLimitService
         if ($user->is_admin) {
             return -1; // Unlimited
         }
-        
+
         $activeSubscription = $user->activeSubscription();
-        
+
         if (!$activeSubscription) {
             return 0;
         }
-        
+
         $package = $activeSubscription->package;
-        
+
         return $package->max_tournaments_per_tab;
     }
-    
+
     /**
      * Get remaining tab space slots for user
      */
@@ -117,24 +124,24 @@ class PackageLimitService
         if ($user->is_admin) {
             return -1; // Unlimited
         }
-        
+
         $activeSubscription = $user->activeSubscription();
-        
+
         if (!$activeSubscription) {
             return 0;
         }
-        
+
         $package = $activeSubscription->package;
-        
+
         if ($package->max_tab_spaces === -1) {
             return -1; // Unlimited
         }
-        
+
         $currentTabSpacesCount = $user->tabspaces()->count();
-        
+
         return max(0, $package->max_tab_spaces - $currentTabSpacesCount);
     }
-    
+
     /**
      * Get remaining tournament slots for user in a specific tab space
      */
@@ -143,24 +150,24 @@ class PackageLimitService
         if ($user->is_admin) {
             return -1; // Unlimited
         }
-        
+
         $activeSubscription = $user->activeSubscription();
-        
+
         if (!$activeSubscription) {
             return 0;
         }
-        
+
         $package = $activeSubscription->package;
-        
+
         if ($package->max_tournaments_per_tab === -1) {
             return -1; // Unlimited
         }
-        
+
         $currentTournamentsCount = 0; // $user->tournaments()->where('tab_space_id', $tabSpaceId)->count();
-        
+
         return max(0, $package->max_tournaments_per_tab - $currentTournamentsCount);
     }
-    
+
     /**
      * Get user's current package limits
      */
@@ -174,9 +181,9 @@ class PackageLimitService
                 'remaining_tournaments_per_tab' => -1,
             ];
         }
-        
+
         $activeSubscription = $user->activeSubscription();
-        
+
         if (!$activeSubscription) {
             return [
                 'tab_spaces' => 0,
@@ -185,13 +192,13 @@ class PackageLimitService
                 'remaining_tournaments_per_tab' => 0,
             ];
         }
-        
+
         $package = $activeSubscription->package;
-        
+
         // Get current counts
         $currentTabSpacesCount = $user->tabspaces()->count();
         $currentTournamentsCount = 0; // $user->tournaments()->count();
-        
+
         return [
             'tab_spaces' => $package->max_tab_spaces,
             'tournaments_per_tab' => $package->max_tournaments_per_tab,
@@ -199,4 +206,4 @@ class PackageLimitService
             'remaining_tournaments_per_tab' => $package->max_tournaments_per_tab === -1 ? -1 : max(0, $package->max_tournaments_per_tab - $currentTournamentsCount),
         ];
     }
-} 
+}

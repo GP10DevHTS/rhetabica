@@ -17,6 +17,7 @@ class Tabspace extends Model
         'user_id',
         'context',
         'slug',
+        'is_public',
     ];
 
     public function user(): BelongsTo
@@ -24,12 +25,38 @@ class Tabspace extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function tournaments()
+    {
+        return $this->hasMany(Tournament::class);
+    }
+
+    public function scopeVisibleTo($query, $user = null)
+    {
+        if (!$user) {
+            $user = Auth::user();
+        }
+
+        if (!$user || (!$user->is_admin && $user->id !== $this->user_id)) {
+            $query->where('is_public', true);
+        }
+
+        if ($user && !$user->is_admin) {
+            $query->where(function($q) use ($user) {
+                $q->where('is_public', true)
+                  ->orWhere('user_id', $user->id);
+            });
+        }
+
+        return $query;
+    }
+
     protected static function boot()
     {
         parent::boot();
 
         static::creating(function ($model) {
-            $model->user_id = Auth::id();
+            if(Auth::check())
+                $model->user_id = Auth::id();
 
             $baseSlug = Str::slug($model->name);
             $slug = $baseSlug;

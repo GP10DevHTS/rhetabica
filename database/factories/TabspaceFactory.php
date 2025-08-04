@@ -25,7 +25,7 @@ class TabspaceFactory extends Factory
         return [
             'user_id' => User::factory(),
             'name' => $this->faker->sentence,
-            'content' => $this->faker->paragraph,
+            'context' => $this->faker->paragraph,
         ];
     }
 }

@@ -17,6 +17,11 @@
                     <flux:navlist.item icon="square-2-stack" :href="route('tabspaces.index')" :current="request()->routeIs('tabspaces.*')" wire:navigate>{{ __('Tabspaces') }}</flux:navlist.item>
                 </flux:navlist.group>
 
+                <flux:navlist.group :heading="__('Explore')" class="grid">
+                    <flux:navlist.item icon="magnifying-glass" :href="route('tabspaces.explore')" :current="request()->routeIs('tabspaces.explore')" wire:navigate>{{ __('Public Tabspaces') }}</flux:navlist.item>
+                    <flux:navlist.item icon="trophy" :href="route('tournaments.explore')" :current="request()->routeIs('tournaments.explore')" wire:navigate>{{ __('Public Tournaments') }}</flux:navlist.item>
+                </flux:navlist.group>
+
                 @auth
                     @if(auth()->user()->is_admin)
                         <flux:navlist.group :heading="__('Package Management')" class="grid">
