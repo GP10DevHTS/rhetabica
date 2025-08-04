@@ -17,7 +17,7 @@ class Show extends Component
 
     public function togglePublic()
     {
-        if (Auth::id() === $this->tournament->user_id || Auth::user()->is_admin) {
+        if (Auth::id() === $this->tournament->user_id || Auth::user()->is_admin || Auth::id() === $this->tournament->tabspace->user_id) {
             $this->tournament->is_public = !$this->tournament->is_public;
             $this->tournament->save();
         }

@@ -50,7 +50,10 @@ class TournamentList extends Component
 
     public function render()
     {
-        $tournaments = $this->tabspace->tournaments()->latest()->get();
+        $tournaments = $this->tabspace->tournaments()->latest()->get()
+            ->reject(function ($tournament) {
+                return !$tournament->is_public && $tournament->user_id !== Auth::id() && !Auth::user()->is_admin && $this->tabspace->user_id != Auth::id();
+            });
         return view('livewire.tabspaces.tournament-list', [
             'tournaments' => $tournaments,
         ]);
