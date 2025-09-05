@@ -5,10 +5,14 @@ namespace App\Livewire\Tournaments;
 use App\Models\Tournament;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
+use Livewire\Attributes\Url;
 
 class Show extends Component
 {
     public Tournament $tournament;
+
+    #[Url(keep: true, as: 'tab')]
+    public string $tab = 'overview'; // default tab
 
     public function mount(Tournament $tournament)
     {
@@ -21,6 +25,11 @@ class Show extends Component
             $this->tournament->is_public = !$this->tournament->is_public;
             $this->tournament->save();
         }
+    }
+
+    public function switchTab(string $tab)
+    {
+        $this->tab = $tab; // update tab when clicked
     }
 
     public function render()

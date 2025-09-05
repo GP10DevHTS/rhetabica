@@ -40,6 +40,9 @@ class DatabaseSeeder extends Seeder
         ]);
         $this->command->info("Created test user: {$user->name} ({$user->email})");
 
+        // Seed institutions
+        $this->call(InstitutionSeeder::class);
+
         $this->command->info('Database seeding completed successfully!');
     }
 }

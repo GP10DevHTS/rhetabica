@@ -30,6 +30,7 @@ Route::middleware(['auth'])->group(function () {
 
     // Tournament routes
     Route::get('tournaments/{tournament:slug}', \App\Livewire\Tournaments\Show::class)->name('tournaments.show');
+    // Route::get('tournaments/{tournament:slug}/participants', \App\Livewire\Tournaments\Participants\Index::class)->name('tournament.participants');
 });
 
 // Admin-only routes for package and subscription management
