@@ -130,6 +130,8 @@
                         <div class="p-4 border rounded shadow-sm bg-white dark:bg-gray-800 dark:border-gray-700">
                             <h5 class="font-semibold text-gray-900 dark:text-gray-100">{{ $judge->participant->name }}
                             </h5>
+                             <p class="text-sm text-gray-600 dark:text-gray-400">Nickname:
+                                        {{ $judge->nickname ?? 'N/A' }}</p>
                             <p class="text-sm text-gray-600 dark:text-gray-400">Institution:
                                 {{ $judge->institution->name }}</p>
                             <p class="text-sm text-gray-500 dark:text-gray-400">Email:
@@ -151,6 +153,8 @@
                         <div class="p-4 border rounded shadow-sm bg-white dark:bg-gray-800 dark:border-gray-700">
                             <h5 class="font-semibold text-gray-900 dark:text-gray-100">{{ $patron->participant->name }}
                             </h5>
+                             <p class="text-sm text-gray-600 dark:text-gray-400">Nickname:
+                                        {{ $patron->nickname ?? 'N/A' }}</p>
                             <p class="text-sm text-gray-600 dark:text-gray-400">Institution:
                                 {{ $patron->institution->name }}</p>
                             <p class="text-sm text-gray-500 dark:text-gray-400">Email:
@@ -172,6 +176,8 @@
                         <div class="p-4 border rounded shadow-sm bg-white dark:bg-gray-800 dark:border-gray-700">
                             <h5 class="font-semibold text-gray-900 dark:text-gray-100">{{ $tabMaster->participant->name }}
                             </h5>
+                             <p class="text-sm text-gray-600 dark:text-gray-400">Nickname:
+                                        {{ $tabMaster->nickname ?? 'N/A' }}</p>
                             <p class="text-sm text-gray-600 dark:text-gray-400">Institution:
                                 {{ $tabMaster->institution->name }}</p>
                             <p class="text-sm text-gray-500 dark:text-gray-400">Email:
