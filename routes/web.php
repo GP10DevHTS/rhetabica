@@ -13,6 +13,10 @@ Route::view('dashboard', 'dashboard')
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
 
+// Public routes for browsing public tabspaces and tournaments
+Route::get('explore/tabspaces', \App\Livewire\Tabspaces\Explore::class)->name('tabspaces.explore');
+Route::get('explore/tournaments', \App\Livewire\Tournaments\Explore::class)->name('tournaments.explore');
+
 Route::middleware(['auth'])->group(function () {
     Route::redirect('settings', 'settings/profile');
 
@@ -23,6 +27,9 @@ Route::middleware(['auth'])->group(function () {
     // Tabspace routes
     Route::get('tabspaces', \App\Livewire\Tabspaces\Index::class)->name('tabspaces.index');
     Route::get('tabspaces/{tabspace:slug}', \App\Livewire\Tabspaces\Show::class)->name('tabspaces.show');
+
+    // Tournament routes
+    Route::get('tournaments/{tournament:slug}', \App\Livewire\Tournaments\Show::class)->name('tournaments.show');
 });
 
 // Admin-only routes for package and subscription management
@@ -32,7 +39,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('packages/create', \App\Livewire\Packages\Create::class)->name('packages.create');
     Route::get('packages/{package}', \App\Livewire\Packages\Show::class)->name('packages.show');
     Route::get('packages/{package}/edit', \App\Livewire\Packages\Edit::class)->name('packages.edit');
-    
+
     // Subscription routes
     Route::get('subscriptions', \App\Livewire\Subscriptions\Index::class)->name('subscriptions.index');
     Route::get('subscriptions/create', \App\Livewire\Subscriptions\Create::class)->name('subscriptions.create');

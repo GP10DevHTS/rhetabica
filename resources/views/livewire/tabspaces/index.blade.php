@@ -23,6 +23,12 @@
                             <flux:textarea wire:model="context" :label="__('Tabspace Context')" type="text" required
                                 autofocus autocomplete="off" />
 
+                            <flux:field variant="inline">
+                                <flux:checkbox wire:model="is_public" />
+                                <flux:label>Make this tabspace public</flux:label>
+                                <flux:error name="is_public" />
+                            </flux:field>
+
                             <flux:spacer />
                             <div class="flex items-center gap-4">
                                 <div class="flex items-center justify-end">
@@ -46,6 +52,9 @@
                                     <th scope="col"
                                         class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 dark:text-white sm:pl-6">
                                         Name</th>
+                                    <th scope="col"
+                                        class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-white">
+                                        Visibility</th>
                                     <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-6">
                                         <span class="sr-only">Edit</span>
                                     </th>
@@ -61,12 +70,24 @@
                                                 {{ \Illuminate\Support\Str::limit($tabspace->context, 50) }}
                                             </div>
                                         </td>
+                                        <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-400">
+                                            @if($tabspace->is_public)
+                                                <flux:badge color="green">Public</flux:badge>
+                                            @else
+                                                <flux:badge color="gray">Private</flux:badge>
+                                            @endif
+                                        </td>
                                         <td
                                             class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
-                                            <flux:button href="{{ route('tabspaces.show', $tabspace->slug) }}"
-                                                icon:trailing="arrow-up-right">
-                                                Details
-                                            </flux:button>
+                                            <div class="flex space-x-2 justify-end">
+                                                <flux:button wire:click="edit({{ $tabspace->id }})" icon="pencil">
+                                                    Edit
+                                                </flux:button>
+                                                <flux:button href="{{ route('tabspaces.show', $tabspace->slug) }}"
+                                                    icon:trailing="arrow-up-right">
+                                                    Details
+                                                </flux:button>
+                                            </div>
                                         </td>
                                     </tr>
                                 @empty
@@ -84,5 +105,32 @@
                 </div>
             </div>
         </div>
+
+        <!-- Edit Modal -->
+        <flux:modal name="edit-tabspace-modal" variant="flyout" title="Edit Tabspace">
+            <section class="w-full">
+                <form wire:submit="update" class="my-6 w-full space-y-6">
+                    <flux:input wire:model="name" :label="__('Tabspace Name')" type="text" required autofocus
+                        autocomplete="off" />
+
+                    <flux:textarea wire:model="context" :label="__('Tabspace Context')" type="text" required
+                        autofocus autocomplete="off" />
+
+                    <flux:field variant="inline">
+                        <flux:checkbox wire:model="is_public" />
+                        <flux:label>Make this tabspace public</flux:label>
+                        <flux:error name="is_public" />
+                    </flux:field>
+
+                    <flux:spacer />
+                    <div class="flex items-center gap-4">
+                        <div class="flex items-center justify-end">
+                            <flux:button variant="primary" type="submit" class="w-full">{{ __('Update') }}
+                            </flux:button>
+                        </div>
+                    </div>
+                </form>
+            </section>
+        </flux:modal>
     </div>
 </div>
