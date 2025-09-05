@@ -42,6 +42,7 @@ class DatabaseSeeder extends Seeder
 
         // Seed institutions
         $this->call(InstitutionSeeder::class);
+        $this->call(ParticipantCategoriesSeeder::class);
 
         $this->command->info('Database seeding completed successfully!');
     }

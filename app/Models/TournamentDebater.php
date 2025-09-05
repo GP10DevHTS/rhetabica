@@ -17,6 +17,7 @@ class TournamentDebater extends Model
         'tournament_participant_id',
         'uuid',  // slug/unique identifier
         'nickname',
+        'participant_category_id',
     ];
 
     protected static function boot()
@@ -52,5 +53,13 @@ class TournamentDebater extends Model
     public function institution()
     {
         return $this->belongsTo(Institution::class, 'institution_id');
+    }
+
+    /**
+     * Optional: The category this debater belongs to.
+     */
+    public function participantCategory()
+    {
+        return $this->belongsTo(ParticipantCategory::class, 'participant_category_id');
     }
 }

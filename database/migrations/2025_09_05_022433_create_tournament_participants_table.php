@@ -20,8 +20,8 @@ return new class extends Migration
             $table->string('name');
             $table->uuid('uuid')->nullable();
             $table->string('slug')->nullable();
-            $table->string('email')->nullabe();
-            $table->string('phone')->nullabe();
+            $table->string('email')->nullable();
+            $table->string('phone')->nullable();
             $table->enum('gender', ['male','female']);
         });
     }
