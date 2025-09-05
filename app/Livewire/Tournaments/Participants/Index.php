@@ -163,17 +163,16 @@ class Index extends Component
 
     public function render()
     {
-             $search = $this->search;
-        return view('livewire.tournaments.participants.index',[
-        
+        $search = $this->search;
 
-           'debaters' => TournamentDebater::with(['participant', 'participantCategory', 'institution'])
+        return view('livewire.tournaments.participants.index',[
+            'debaters' => TournamentDebater::with(['participant', 'participantCategory', 'institution'])
                 ->where('tournament_id', $this->tournament->id)
                 ->whereHas('participant', function ($q) use ($search) {
                     if ($search) {
                         $q->where('name', 'like', "%{$search}%")
-                          ->orWhere('email', 'like', "%{$search}%")
-                          ->orWhere('phone', 'like', "%{$search}%");
+                            ->orWhere('email', 'like', "%{$search}%")
+                            ->orWhere('phone', 'like', "%{$search}%");
                     }
                 })
                 ->get()
@@ -212,9 +211,6 @@ class Index extends Component
                                 }
                             })
                             ->get(),
-
-                            // dd($this->debaters,$this->judges,$this->patrons,$this->tabMasters, $this->tournament);
-
 
         ]);
     }
