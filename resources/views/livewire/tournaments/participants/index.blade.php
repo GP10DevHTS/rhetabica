@@ -108,7 +108,7 @@
                                     <p class="text-sm text-gray-600 dark:text-gray-400">Category:
                                         {{ $debater->participantCategory?->name ?? 'N/A' }}</p>
                                     <p class="text-sm text-gray-600 dark:text-gray-400">Institution:
-                                        {{ $debater->institution->name }}</p>
+                                        {{ $debater->institution?->institution?->name }}</p>
                                     <p class="text-sm text-gray-500 dark:text-gray-400">Email:
                                         {{ $debater->participant->email ?? '-' }}</p>
                                     <p class="text-sm text-gray-500 dark:text-gray-400">Phone:
@@ -133,7 +133,7 @@
                              <p class="text-sm text-gray-600 dark:text-gray-400">Nickname:
                                         {{ $judge->nickname ?? 'N/A' }}</p>
                             <p class="text-sm text-gray-600 dark:text-gray-400">Institution:
-                                {{ $judge->institution->name }}</p>
+                                {{ $judge->institution?->institution?->name }}</p>
                             <p class="text-sm text-gray-500 dark:text-gray-400">Email:
                                 {{ $judge->participant->email ?? '-' }}</p>
                             <p class="text-sm text-gray-500 dark:text-gray-400">Phone:
@@ -156,7 +156,7 @@
                              <p class="text-sm text-gray-600 dark:text-gray-400">Nickname:
                                         {{ $patron->nickname ?? 'N/A' }}</p>
                             <p class="text-sm text-gray-600 dark:text-gray-400">Institution:
-                                {{ $patron->institution->name }}</p>
+                                {{ $patron->institution?->institution?->name }}</p>
                             <p class="text-sm text-gray-500 dark:text-gray-400">Email:
                                 {{ $patron->participant->email ?? '-' }}</p>
                             <p class="text-sm text-gray-500 dark:text-gray-400">Phone:
@@ -179,7 +179,7 @@
                              <p class="text-sm text-gray-600 dark:text-gray-400">Nickname:
                                         {{ $tabMaster->nickname ?? 'N/A' }}</p>
                             <p class="text-sm text-gray-600 dark:text-gray-400">Institution:
-                                {{ $tabMaster->institution->name }}</p>
+                                {{ $tabMaster->institution?->institution?->name }}</p>
                             <p class="text-sm text-gray-500 dark:text-gray-400">Email:
                                 {{ $tabMaster->participant->email ?? '-' }}</p>
                             <p class="text-sm text-gray-500 dark:text-gray-400">Phone:

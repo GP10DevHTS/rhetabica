@@ -92,7 +92,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="2"
+                                        <td colspan="3"
                                             class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 dark:text-white sm:pl-6">
                                             No tabspaces found.
                                         </td>

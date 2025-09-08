@@ -17,6 +17,7 @@ class TournamentTabMaster extends Model
         'tournament_participant_id',
         'uuid',  // slug/unique identifier
         'nickname',
+        'tournament_institution_id',
     ];
 
     protected static function boot()
@@ -51,6 +52,6 @@ class TournamentTabMaster extends Model
      */
     public function institution()
     {
-        return $this->belongsTo(Institution::class, 'institution_id');
+        return $this->belongsTo(TournamentInstitution::class, 'tournament_institution_id')->withTrashed();
     }
 }

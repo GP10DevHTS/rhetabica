@@ -2,10 +2,10 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Str;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class TournamentJudge extends Model
 {
@@ -17,6 +17,7 @@ class TournamentJudge extends Model
         'tournament_participant_id',
         'uuid',  // slug/unique identifier
         'nickname',
+        'tournament_institution_id',   
     ];
 
     protected static function boot()
@@ -51,6 +52,6 @@ class TournamentJudge extends Model
      */
     public function institution()
     {
-        return $this->belongsTo(Institution::class, 'institution_id');
+        return $this->belongsTo(TournamentInstitution::class, 'tournament_institution_id')->withTrashed();
     }
 }

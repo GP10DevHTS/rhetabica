@@ -19,8 +19,8 @@ return new class extends Migration
             $table->uuid('uuid')->nullable();
             $table->string('nickname')->nullable();
             
+            $table->foreignIdFor(\App\Models\TournamentInstitution::class);
             $table->foreignIdFor(\App\Models\Tournament::class);
-            $table->foreignIdFor(\App\Models\Institution::class);
             $table->foreignIdFor(\App\Models\TournamentParticipant::class);
         });
     }

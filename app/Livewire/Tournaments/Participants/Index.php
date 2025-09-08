@@ -11,6 +11,7 @@ use App\Models\TournamentPatron;
 use App\Models\TournamentDebater;
 use App\Models\ParticipantCategory;
 use App\Models\TournamentTabMaster;
+use App\Models\TournamentInstitution;
 use App\Models\TournamentParticipant;
 
 class Index extends Component
@@ -82,6 +83,13 @@ class Index extends Component
             'phone.required_without' => 'You must provide either a phone number or an email.',
         ]);
 
+        $schoolInvite = TournamentInstitution::firstOrCreate(
+            [
+                'tournament_id' => $this->tournament->id,
+                'institution_id' => $this->institution,
+            ]
+        );
+
         // Check if participant already exists globally (by email or phone)
         $participant = TournamentParticipant::firstOrCreate(
             [
@@ -105,7 +113,7 @@ class Index extends Component
                         'tournament_id' => $this->tournament->id,
                     ],
                     [
-                        'institution_id' => $this->institution,
+                        'tournament_institution_id' => $schoolInvite->id,
                         'nickname' => $this->nickname,
                         'participant_category_id' => $this->participantCategory ?? null,
                     ]
@@ -119,7 +127,7 @@ class Index extends Component
                         'tournament_id' => $this->tournament->id,
                     ],
                     [
-                        'institution_id' => $this->institution,
+                        'tournament_institution_id' => $schoolInvite->id,
                         'nickname' => $this->nickname,
                     ]
                 );
@@ -132,7 +140,7 @@ class Index extends Component
                         'tournament_id' => $this->tournament->id,
                     ],
                     [
-                        'institution_id' => $this->institution,
+                        'tournament_institution_id' => $schoolInvite->id,
                         'nickname' => $this->nickname,
                     ]
                 );
@@ -145,7 +153,7 @@ class Index extends Component
                         'tournament_id' => $this->tournament->id,
                     ],
                     [
-                        'institution_id' => $this->institution,
+                        'tournament_institution_id' => $schoolInvite->id,
                         'nickname' => $this->nickname,
                     ]
                 );
@@ -166,7 +174,7 @@ class Index extends Component
         $search = $this->search;
 
         return view('livewire.tournaments.participants.index',[
-            'debaters' => TournamentDebater::with(['participant', 'participantCategory', 'institution'])
+            'debaters' => TournamentDebater::with(['participant', 'participantCategory', 'institution.institution'])
                 ->where('tournament_id', $this->tournament->id)
                 ->whereHas('participant', function ($q) use ($search) {
                     if ($search) {
@@ -179,7 +187,7 @@ class Index extends Component
                 ->groupBy(fn($d) => $d->participantCategory?->name ?? 'Uncategorized'),
 
 
-            'judges' => TournamentJudge::with(['participant', 'institution'])
+            'judges' => TournamentJudge::with(['participant', 'institution.institution'])
                             ->where('tournament_id', $this->tournament->id)
                             ->whereHas('participant', function ($q) use ($search) {
                                 if ($search) {
@@ -190,7 +198,7 @@ class Index extends Component
                             })
                             ->get(),
 
-            'patrons' => TournamentPatron::with(['participant', 'institution'])
+            'patrons' => TournamentPatron::with(['participant', 'institution.institution'])
                             ->where('tournament_id', $this->tournament->id)
                             ->whereHas('participant', function ($q) use ($search) {
                                 if ($search) {
@@ -201,7 +209,7 @@ class Index extends Component
                             })
                             ->get(),
 
-            'tabMasters' => TournamentTabMaster::with(['participant', 'institution'])
+            'tabMasters' => TournamentTabMaster::with(['participant', 'institution.institution'])
                             ->where('tournament_id', $this->tournament->id)
                             ->whereHas('participant', function ($q) use ($search) {
                                 if ($search) {
