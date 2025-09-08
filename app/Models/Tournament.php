@@ -57,4 +57,9 @@ class Tournament extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function institutions()
+    {
+        return $this->hasMany(TournamentInstitution::class);
+    }
 }

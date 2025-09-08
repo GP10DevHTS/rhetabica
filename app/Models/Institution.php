@@ -2,10 +2,11 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Str;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 
 class Institution extends Model
@@ -27,7 +28,15 @@ class Institution extends Model
         parent::boot();
         static::creating(function ($model) {
             $model->uuid = Str::slug($model->name);
+             // Prevent duplicates by slug
+            if (Institution::where('uuid', $model->uuid)->exists()) {
+                throw new \Exception("Institution with this name already exists.");
+            }
+            if (Auth::check()) {
+                $model->user_id = Auth::id();
+            }
         });
+        
     }
 
     /**

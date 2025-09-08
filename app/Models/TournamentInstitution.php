@@ -17,6 +17,13 @@ class TournamentInstitution extends Model
         'institution_id',
         'uuid',  // slug/unique identifier
         'name_override',
+        'invited_at',
+        'invited_by',
+        'confirmed_at',
+        'confirmed_by',
+        'arrived_at',
+        'arrived_recorded_by',
+        'invitation_notes',
     ];
 
     protected static function boot()
@@ -28,13 +35,45 @@ class TournamentInstitution extends Model
                 $model->uuid = Str::uuid()->toString();
             }
 
-            if(Auth::check())
+            if (Auth::check()) {
                 $model->user_id = Auth::id();
+            }
         });
     }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Relationships
+    |--------------------------------------------------------------------------
+    */
 
     public function institution()
     {
         return $this->belongsTo(Institution::class)->withTrashed();
+    }
+
+    public function tournament()
+    {
+        return $this->belongsTo(Tournament::class);
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function invitedBy()
+    {
+        return $this->belongsTo(User::class, 'invited_by');
+    }
+
+    public function confirmedBy()
+    {
+        return $this->belongsTo(User::class, 'confirmed_by');
+    }
+
+    public function arrivedRecordedBy()
+    {
+        return $this->belongsTo(User::class, 'arrived_recorded_by');
     }
 }

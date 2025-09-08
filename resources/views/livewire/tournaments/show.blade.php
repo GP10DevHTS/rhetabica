@@ -59,12 +59,8 @@
                 </div>
             @elseif($tab === 'participants')
                 @livewire('tournaments.participants.index', ['tournament' => $tournament], key('participants-'.$tournament->id))
-                
             @elseif($tab === 'institutions')
-                <div>
-                    <h2 class="text-xl font-semibold mb-4">Institutions</h2>
-                    {{-- Loop institutions --}}
-                </div>
+                @livewire('tournaments.institutions.index', ['tournament' => $tournament], key('institutions-'.$tournament->id))
             @endif
         </div>
 
