@@ -47,7 +47,23 @@
                 {{ $tab === 'institutions' ? 'border-b-2 border-indigo-500 text-indigo-600 dark:text-indigo-400' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400' }}">
                     Institutions
                 </button>
+                <button wire:click="switchTab('teams')"
+                    class="py-2 px-3 text-sm font-medium
+                {{ $tab === 'teams' ? 'border-b-2 border-indigo-500 text-indigo-600 dark:text-indigo-400' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400' }}">
+                    Teams
+                </button>
             </nav>
+        </div>
+
+        {{-- loading indicator --}}
+        <div wire:loading class="mb-4">
+            <div class="flex items-center space-x-2 text-gray-500 dark:text-gray-400">
+                <svg class="animate-spin h-5 w-5 text-indigo-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                </svg>
+                <span>Loading...</span>
+            </div>
         </div>
 
         {{-- tab content --}}
@@ -61,6 +77,10 @@
                 @livewire('tournaments.participants.index', ['tournament' => $tournament], key('participants-'.$tournament->id))
             @elseif($tab === 'institutions')
                 @livewire('tournaments.institutions.index', ['tournament' => $tournament], key('institutions-'.$tournament->id))
+            @elseif($tab === 'teams')
+                @livewire('tournaments.teams.index', ['tournament' => $tournament], key('teams-'.$tournament->id))
+            @else
+                <p>Select a tab to view content.</p>
             @endif
         </div>
 
