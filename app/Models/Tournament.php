@@ -62,4 +62,30 @@ class Tournament extends Model
     {
         return $this->hasMany(TournamentInstitution::class);
     }
+
+    public function participants()
+    {
+        // new members in the system
+        return $this->hasMany(TournamentParticipant::class);
+    }
+
+    public function judges()
+    {
+        return $this->hasMany(TournamentJudge::class);
+    }
+
+    public function tabMasters()
+    {
+        return $this->hasMany(TournamentTabMaster::class);
+    }
+    public function patrons()
+    {
+        return $this->hasMany(TournamentPatron::class);
+    }
+    public function debaters()
+    {
+        // actual debters for the whole tournament
+        return $this->hasMany(TournamentDebater::class);
+    }
 }
+

@@ -69,10 +69,7 @@
         {{-- tab content --}}
         <div>
             @if ($tab === 'overview')
-                <div>
-                    <h2 class="text-xl font-semibold mb-4">Overview</h2>
-                    <p>{{ $tournament->description ?? 'No overview available.' }}</p>
-                </div>
+                @livewire('tournaments.overview', ['tournament' => $tournament], key('overview-'.$tournament->id))
             @elseif($tab === 'participants')
                 @livewire('tournaments.participants.index', ['tournament' => $tournament], key('participants-'.$tournament->id))
             @elseif($tab === 'institutions')
