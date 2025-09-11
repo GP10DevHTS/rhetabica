@@ -87,5 +87,10 @@ class Tournament extends Model
         // actual debters for the whole tournament
         return $this->hasMany(TournamentDebater::class);
     }
+
+    // teams
+    public function teams(){
+        return $this->hasMany(TournamentTeam::class);
+    }
 }
 

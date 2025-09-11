@@ -18,6 +18,7 @@ class TournamentTeam extends Model
         'participant_category_id',
         'created_by',
         'tournament_institution_id',
+        'slug',
     ];
 
     
@@ -31,6 +32,7 @@ class TournamentTeam extends Model
             if (Auth::check() && empty($model->created_by)) {
                 $model->created_by = Auth::id();
             }
+            $model->slug = Str::slug($model->name);
         });
     }
 

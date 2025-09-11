@@ -20,6 +20,7 @@ return new class extends Migration
             $table->foreignIdFor(Tournament::class)->cascadeOnDelete();
             $table->string('uuid')->nullable();
             $table->string('name');
+            $table->string('slug');
             $table->foreignIdFor(ParticipantCategory::class)->nullable()->nullOnDelete();
             $table->timestamps();
             $table->foreignIdFor(TournamentInstitution::class)->nullable()->nullOnDelete(); // optional institution association
