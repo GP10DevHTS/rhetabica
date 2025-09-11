@@ -4,11 +4,13 @@ namespace App\Livewire\Tournaments\Teams;
 
 use Flux\Flux;
 use Livewire\Component;
+use App\Models\TeamMember;
 use App\Models\Tournament;
-use App\Models\TournamentTeam;
-use App\Models\ParticipantCategory;
-use Illuminate\Validation\Rule;
 use Illuminate\Support\Str;
+use App\Models\TournamentTeam;
+use Illuminate\Validation\Rule;
+use App\Models\TournamentDebater;
+use App\Models\ParticipantCategory;
 
 class Index extends Component
 {
@@ -125,6 +127,68 @@ class Index extends Component
             'deleteTeamName',
         ]);
     }
+
+    public $managingTeam;
+    public $teamMembers = [];
+    public $newMemberDebater;
+    public $newMemberRole;
+    public $availableDebaters = [];
+
+    public function manageMembers($teamId)
+    {
+        $this->managingTeam = TournamentTeam::with('members.debater')->findOrFail($teamId);
+        $this->teamMembers = $this->managingTeam->members;
+
+        // dd( $this->teamMembers );
+
+       $this->loadAvailableDebaters();
+
+        // dd($this->availableDebaters);
+
+        Flux::modal('manage-members-modal')->show();
+    }
+
+    private function loadAvailableDebaters()
+    {
+    $this->availableDebaters = TournamentDebater::withoutTeam()
+                ->where('tournament_id', $this->tournament->id)
+                ->with('participant') // eager load participant
+                ->get()
+                ->mapWithKeys(fn($debater) => [
+                    $debater->id => $debater->participant->name . ($debater->nickname ? " ({$debater->nickname})" : ""),
+                ]);
+    }
+
+
+    public function addMember()
+    {
+        $this->validate([
+            'newMemberDebater' => 'required|exists:tournament_debaters,id',
+            'newMemberRole' => 'nullable|string|max:50',
+        ]);
+
+        $this->managingTeam->members()->create([
+            'tournament_debater_id' => $this->newMemberDebater,
+            'role' => $this->newMemberRole,
+        ]);
+
+        $this->teamMembers = $this->managingTeam->fresh()->members;
+        $this->reset(['newMemberDebater', 'newMemberRole']);
+
+        $this->loadAvailableDebaters();
+
+        flash()->addSuccess('Member added successfully.');
+    }
+
+    public function removeMember($id)
+    {
+        TeamMember::findOrFail($id)->delete();
+        $this->teamMembers = $this->managingTeam->fresh()->members;
+        $this->loadAvailableDebaters();
+        
+        flash()->addSuccess('Member removed successfully.');
+    }
+
 
     public function render()
     {

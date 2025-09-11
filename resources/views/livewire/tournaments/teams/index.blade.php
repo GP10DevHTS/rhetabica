@@ -38,13 +38,18 @@
                     @endif
 
                     <div class="mt-auto flex space-x-2">
+                        <flux:button size="sm" wire:click="manageMembers({{ $team->id }})" icon="users">
+                            Members
+                        </flux:button>
+
                         <!-- Edit Button -->
-                        <flux:button size="sm" wire:click="editTeam({{ $team->id }})" icon="pencil-square">Edit</flux:button>
-                        
+                        <flux:button size="sm" wire:click="editTeam({{ $team->id }})" icon="pencil-square">Edit
+                        </flux:button>
 
                         <!-- Delete Button -->
-                        <flux:button size="sm" wire:click="confirmDeleteTeam({{ $team->id }})" variant="danger" icon="trash">Delete</flux:button>
-                        
+                        <flux:button size="sm" wire:click="confirmDeleteTeam({{ $team->id }})" variant="danger"
+                            icon="trash">Delete</flux:button>
+
                     </div>
                 </div>
             @empty
@@ -83,6 +88,65 @@
                 </div>
             </div>
         </flux:modal>
+
+
+
+        <flux:modal variant="flyout" name="manage-members-modal" title="Manage Team Members">
+            <div class="space-y-4">
+                <h3 class="font-semibold text-lg text-gray-800 dark:text-gray-200">
+                    {{ $managingTeam?->name }}
+                </h3>
+
+                <!-- Members List -->
+                <div class="space-y-2">
+                    {{-- @dd($teamMembers) --}}
+                    @forelse($teamMembers as $member)
+                        <div
+                            class="flex items-center justify-between p-3 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+                            <!-- Left: Name & role -->
+                            <div>
+                                <p class="font-medium text-gray-900 dark:text-gray-100">
+                                    {{ $member->debater->participant->name }}
+                                    @if ($member->debater->nickname)
+                                        <span
+                                            class="text-gray-500 dark:text-gray-400">({{ $member->debater->nickname }})</span>
+                                    @endif
+                                </p>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">
+                                    Role: <span class="font-semibold">{{ ucfirst($member->role) }}</span>
+                                </p>
+                            </div>
+
+                            <!-- Right: Action -->
+                            <flux:button size="xs" variant="danger" wire:click="removeMember({{ $member->id }})"
+                                icon="trash">
+                                Remove
+                            </flux:button>
+                        </div>
+
+                    @empty
+                        <p class="text-gray-500 dark:text-gray-400">No members yet.</p>
+                    @endforelse
+                </div>
+
+                <!-- Add Member Form -->
+                <div class="space-y-2">
+                    <flux:select label="Select Debater" wire:model="newMemberDebater">
+                        <option value="">-- Choose Debater --</option>
+                        @foreach ($availableDebaters as $debaterId => $debaterName)
+                            <flux:select.option value="{{ $debaterId }}">
+                                {{ $debaterName }}
+                            </flux:select.option>
+                        @endforeach
+                    </flux:select>
+
+                    <flux:input label="Role" type="text" wire:model="newMemberRole" />
+
+                    <flux:button wire:click="addMember" icon="plus">Add Member</flux:button>
+                </div>
+            </div>
+        </flux:modal>
+
     </div>
 
 

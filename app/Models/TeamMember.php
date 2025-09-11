@@ -39,6 +39,6 @@ class TeamMember extends Model
 
     public function debater()
     {
-        return $this->belongsTo(TournamentDebater::class);
+        return $this->belongsTo(TournamentDebater::class, 'tournament_debater_id');
     }
 }
