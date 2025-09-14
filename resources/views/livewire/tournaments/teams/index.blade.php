@@ -9,9 +9,14 @@
             </h2>
 
             <!-- Button: Open Create Modal -->
-            <flux:modal.trigger name="create-team-modal">
-                <flux:button icon="plus">Create Team</flux:button>
-            </flux:modal.trigger>
+            <div class="flex justify-between items-center space-x-2  mb-6">
+                <flux:modal.trigger name="create-team-modal">
+                    <flux:button icon="plus">Create Team</flux:button>
+                </flux:modal.trigger>
+
+                @livewire('tournaments.teams.ai-generate', ['tournament' => $tournament], key('ai-generate-' . $tournament->id))
+            </div>
+
         </div>
 
         <!-- Teams List -->
@@ -113,7 +118,7 @@
                                     @endif
                                 </p>
                                 <p class="text-xs text-gray-500 dark:text-gray-400">
-                                    Role: <span class="font-semibold">{{ ucfirst($member->role) }}</span>
+                                    Role: <span class="font-semibold">{{ ucfirst($member->role ?? '—') }}</span>
                                 </p>
                             </div>
 
@@ -128,6 +133,8 @@
                         <p class="text-gray-500 dark:text-gray-400">No members yet.</p>
                     @endforelse
                 </div>
+
+                <flux:separator text="or add a new member" />
 
                 <!-- Add Member Form -->
                 <div class="space-y-2">

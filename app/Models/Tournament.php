@@ -60,7 +60,7 @@ class Tournament extends Model
 
     public function institutions()
     {
-        return $this->hasMany(TournamentInstitution::class);
+        return $this->hasMany(TournamentInstitution::class, 'tournament_id');
     }
 
     public function participants()
@@ -92,5 +92,24 @@ class Tournament extends Model
     public function teams(){
         return $this->hasMany(TournamentTeam::class);
     }
+
+    public function participantCategories()
+    {
+        return ParticipantCategory::whereIn(
+            'id',
+            $this->debaters()->pluck('participant_category_id')->filter()->unique()
+        );
+    }
+
+     public function participantInstitutions()
+    {
+        return Institution::whereIn(
+            'id',
+            $this->institutions()
+                ->whereNotNull('arrived_at')
+                ->pluck('institution_id')->filter()->unique()
+        );
+    }
+
 }
 
