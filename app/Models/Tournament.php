@@ -111,5 +111,10 @@ class Tournament extends Model
         );
     }
 
+    public function rooms()
+    {
+        return $this->hasMany(TournamentRoom::class);
+    }
+
 }
 

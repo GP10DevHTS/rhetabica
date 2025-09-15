@@ -52,6 +52,11 @@
                 {{ $tab === 'teams' ? 'border-b-2 border-indigo-500 text-indigo-600 dark:text-indigo-400' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400' }}">
                     Teams
                 </button>
+                <button wire:click="switchTab('rooms')"
+                    class="py-2 px-3 text-sm font-medium
+                {{ $tab === 'rooms' ? 'border-b-2 border-indigo-500 text-indigo-600 dark:text-indigo-400' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400' }}">
+                    Rooms
+                </button>
             </nav>
         </div>
 
@@ -76,6 +81,8 @@
                 @livewire('tournaments.institutions.index', ['tournament' => $tournament], key('institutions-'.$tournament->id))
             @elseif($tab === 'teams')
                 @livewire('tournaments.teams.index', ['tournament' => $tournament], key('teams-'.$tournament->id))
+            @elseif($tab === 'rooms')
+                @livewire('tournaments.rooms.index', ['tournament' => $tournament], key('rooms-'.$tournament->id))
             @else
                 <p>Select a tab to view content.</p>
             @endif
