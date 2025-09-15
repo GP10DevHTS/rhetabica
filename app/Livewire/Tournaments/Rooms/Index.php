@@ -17,6 +17,7 @@ class Index extends Component
     public $rooms = [];
     public $name;
     public $nickname;
+    public $description;
     public $editingId = null;
 
     public $bulkRoomCount; // for AI generation
@@ -38,6 +39,7 @@ class Index extends Component
         $this->validate([
             'name' => 'required|string|max:255',
             'nickname' => 'nullable|string|max:255',
+            'description' => "nullable|string|max:500",
         ]);
 
         TournamentRoom::create([
@@ -45,6 +47,7 @@ class Index extends Component
             'nickname' => $this->nickname,
             'tournament_id' => $this->tournament->id,
             'user_id' => Auth::id(),
+            'description' => $this->description ?? null,
         ]);
 
         $this->closeModal();
@@ -58,6 +61,7 @@ class Index extends Component
         $this->editingId = $room->id;
         $this->name = $room->name;
         $this->nickname = $room->nickname;
+        $this->description = $room->description;
 
         Flux::modal('edit-room-modal')->show();
     }
@@ -67,12 +71,14 @@ class Index extends Component
         $this->validate([
             'name' => 'required|string|max:255',
             'nickname' => 'nullable|string|max:255',
+            'description' => "nullable|string|max:500",
         ]);
 
         $room = TournamentRoom::findOrFail($this->editingId);
         $room->update([
             'name' => $this->name,
             'nickname' => $this->nickname,
+            'description' => $this->description ?? null,
         ]);
 
         $this->closeModal();

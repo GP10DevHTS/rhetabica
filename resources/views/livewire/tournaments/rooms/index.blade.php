@@ -34,9 +34,12 @@
                             @endif
                         </div>
 
-                        <p class="text-gray-600 dark:text-gray-300 mb-2">
-                            Slug: {{ $room->slug }}
-                        </p>
+                        @if ($room->description)
+                            <p class="text-gray-600 dark:text-gray-300 mb-2">
+                                {!! nl2br($room->description) !!}
+                            </p>
+                        @endif
+
 
                         <div class="mt-auto flex space-x-2">
                             <flux:button size="sm" wire:click="editRoom({{ $room->id }})" icon="pencil-square">
@@ -77,7 +80,7 @@
                     {{-- Manual Creation --}}
                     <flux:input label="Room Name" wire:model.defer="name" placeholder="Enter room name" />
                     <flux:input label="Nickname" wire:model.defer="nickname" placeholder="Optional nickname" />
-
+                    <flux:textarea rows="auto" resize="vertical" label="Description / Location" wire:model.defer="description" placeholder="Optional description or location" />
                     <div class="flex justify-end space-x-2">
                         <flux:button wire:click="closeModal" variant="outline" icon="x-mark">Cancel</flux:button>
                         <flux:button wire:click="createRoom" icon="plus">Create</flux:button>
@@ -92,7 +95,7 @@
                 <div class="space-y-4">
                     <flux:input label="Room Name" wire:model.defer="name" placeholder="Enter room name" />
                     <flux:input label="Nickname" wire:model.defer="nickname" placeholder="Optional nickname" />
-
+                    <flux:textarea rows="auto" resize="vertical" label="Description / Location" wire:model.defer="description" placeholder="Optional description or location" />
                     <div class="flex justify-end space-x-2">
                         <flux:button wire:click="closeModal" variant="outline" icon="x-mark">Cancel</flux:button>
                         <flux:button wire:click="updateRoom" icon="pencil-square">Update</flux:button>
