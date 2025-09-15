@@ -1,7 +1,7 @@
 <div>
     {{-- If you look to others for fulfillment, you will never truly be fulfilled. --}}
     <div>
-        <div class="p-4 dark:bg-gray-900 min-h-screen">
+        <div class="p-6 bg-white dark:bg-gray-900 rounded-2xl shadow">
 
             <!-- Heading -->
             <div class="flex justify-between items-center mb-6">

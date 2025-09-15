@@ -1,6 +1,6 @@
 <div>
     {{-- A good traveler has no fixed plans and is not intent upon arriving. --}}
-    <div class="p-4 dark:bg-gray-900 min-h-screen">
+    <div class="p-6 bg-white dark:bg-gray-900 rounded-2xl shadow">
 
         <!-- Heading -->
         <div class="flex justify-between items-center mb-6">

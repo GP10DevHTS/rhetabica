@@ -1,6 +1,6 @@
 <div>
     {{-- Stop trying to control. --}}
-    <div class="p-6 bg-gray-50 dark:bg-gray-900 min-h-screen">
+    <div class="p-6 bg-white dark:bg-gray-900 rounded-2xl shadow">
         <div class="max-w-7xl mx-auto">
             {{-- <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-6">
                 Tournament Overview: {{ $tournament->name }}
