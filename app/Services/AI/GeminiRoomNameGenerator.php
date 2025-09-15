@@ -2,6 +2,8 @@
 
 namespace App\Services\AI;
 
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 
 class GeminiRoomNameGenerator implements RoomNameGeneratorInterface
@@ -31,36 +33,43 @@ class GeminiRoomNameGenerator implements RoomNameGeneratorInterface
                 ]
             );
 
-            // Extract Gemini response
             $text = $response->json('candidates.0.content.parts.0.text', '');
 
-            // Parse response into array of names
             $names = [];
-
             $lines = preg_split("/\r\n|\r|\n/", $text);
 
             foreach ($lines as $line) {
-                // Match **Room Name** style
                 if (preg_match('/\*\*(.*?)\*\*/', $line, $matches)) {
-                    $names[] = trim($matches[1]);
-                } else {
-                    // Fallback: detect "1. Room Name"
-                    if (preg_match('/^\d+\.\s*(.+?)(:|$)/', $line, $matches)) {
-                        $names[] = trim($matches[1]);
-                    }
+                    $names[] = rtrim(trim($matches[1]), ':');
+                } elseif (preg_match('/^\d+\.\s*(.+?)(:|$)/', $line, $matches)) {
+                    $names[] = rtrim(trim($matches[1]), ':');
                 }
             }
 
-            // Last fallback: split plain text
             if (empty($names)) {
-                $names = array_filter(array_map('trim', preg_split("/[\r\n,]+/", $text)));
+                $names = array_filter(array_map(fn($n) => rtrim(trim($n), ':'), preg_split("/[\r\n,]+/", $text)));
             }
 
-            // dd($names);
+            // --- Log success ---
+            Log::info('AI room name generation success', [
+                'user'       => Auth::check() ? "Id: " . Auth::id() . ", Email: " . Auth::user()->email : 'guest',
+                'tournament' => $tournamentName,
+                'count'      => $count,
+                'prompt'     => $prompt,
+                'raw'        => $response->json(),
+                'parsed'     => $names,
+            ]);
+
             return array_slice($names, 0, $count);
 
         } catch (\Exception $e) {
-            // Fallback list if AI fails
+            Log::error('AI room name generation failed', [
+                'user'       => Auth::check() ? "Id: " . Auth::id() . ", Email: " . Auth::user()->email : 'guest',
+                'tournament' => $tournamentName,
+                'count'      => $count,
+                'error'      => $e->getMessage(),
+            ]);
+
             $fallback = [
                 'The Grand Oratorium', 'The Persuasion Hall', 'The Logic Arena',
                 'The Eloquence Chamber', 'Debate Den', 'Rhetoric Room', 'Reason Retreat'
