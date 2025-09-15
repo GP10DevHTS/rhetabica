@@ -15,10 +15,26 @@ class GeminiRoomNameGenerator implements RoomNameGeneratorInterface
         $this->apiKey = config('services.gemini.api_key');
     }
 
-    public function generate(string $tournamentName, int $count): array
+    /**
+     * Generate AI room names
+     *
+     * @param string $tournamentName
+     * @param int $count
+     * @param array $existingNames
+     * @return array
+     */
+    public function generate(string $tournamentName, int $count, array $existingNames = []): array
     {
         try {
-            $prompt = "Suggest {$count} creative, unique, short room names for a debate tournament called '{$tournamentName}'.";
+            $existingNamesText = empty($existingNames)
+                ? ''
+                : "\nAlready taken room names: " . implode(', ', $existingNames) . ". Please avoid these.";
+
+            $prompt = "Suggest {$count} creative, unique, short room names for a debate tournament called '{$tournamentName}'.{$existingNamesText}
+- Each room name should be on its own line.
+- Do not include numbers, bullets, or descriptions.
+- Do not repeat any existing names.
+- Output only the room names, one per line.";
 
             $response = Http::post(
                 "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={$this->apiKey}",
@@ -35,22 +51,14 @@ class GeminiRoomNameGenerator implements RoomNameGeneratorInterface
 
             $text = $response->json('candidates.0.content.parts.0.text', '');
 
-            $names = [];
+            // Split lines and clean
             $lines = preg_split("/\r\n|\r|\n/", $text);
+            $names = array_filter(array_map(fn($n) => rtrim(trim($n), ':'), $lines));
 
-            foreach ($lines as $line) {
-                if (preg_match('/\*\*(.*?)\*\*/', $line, $matches)) {
-                    $names[] = rtrim(trim($matches[1]), ':');
-                } elseif (preg_match('/^\d+\.\s*(.+?)(:|$)/', $line, $matches)) {
-                    $names[] = rtrim(trim($matches[1]), ':');
-                }
-            }
+            // Remove duplicates and existing names
+            $names = array_values(array_unique(array_diff($names, $existingNames)));
 
-            if (empty($names)) {
-                $names = array_filter(array_map(fn($n) => rtrim(trim($n), ':'), preg_split("/[\r\n,]+/", $text)));
-            }
-
-            // --- Log success ---
+            // Log success
             Log::info('AI room name generation success', [
                 'user'       => Auth::check() ? "Id: " . Auth::id() . ", Email: " . Auth::user()->email : 'guest',
                 'tournament' => $tournamentName,
@@ -63,6 +71,7 @@ class GeminiRoomNameGenerator implements RoomNameGeneratorInterface
             return array_slice($names, 0, $count);
 
         } catch (\Exception $e) {
+            // Log failure
             Log::error('AI room name generation failed', [
                 'user'       => Auth::check() ? "Id: " . Auth::id() . ", Email: " . Auth::user()->email : 'guest',
                 'tournament' => $tournamentName,
@@ -70,6 +79,7 @@ class GeminiRoomNameGenerator implements RoomNameGeneratorInterface
                 'error'      => $e->getMessage(),
             ]);
 
+            // Fallback room names
             $fallback = [
                 'The Grand Oratorium', 'The Persuasion Hall', 'The Logic Arena',
                 'The Eloquence Chamber', 'Debate Den', 'Rhetoric Room', 'Reason Retreat'

@@ -131,8 +131,9 @@ class Index extends Component
      */
     protected function generateAINicknames($count)
     {
+        $existingNames = $this->tournament->rooms()->pluck('name')->toArray();
         return app(RoomNameGenerator::class)
-            ->generate($this->tournament->name, $count, 'gemini'); // default provider
+            ->generate($this->tournament->name, $count, 'gemini', $existingNames); // pass existing names
     }
 
     public function closeModal()
@@ -143,6 +144,7 @@ class Index extends Component
 
     public function render()
     {
+        
         return view('livewire.tournaments.rooms.index', [
             'rooms' => $this->rooms
         ]);

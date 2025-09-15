@@ -12,7 +12,7 @@ class RoomNameGenerator
 
     protected string $default = 'gemini';
 
-    public function generate(string $tournamentName, int $count, string $provider = null): array
+    public function generate(string $tournamentName, int $count, string $provider = null, array $existingNames = []): array
     {
         $provider = $provider ?? $this->default;
 
@@ -20,6 +20,6 @@ class RoomNameGenerator
             throw new \Exception("AI provider {$provider} not available");
         }
 
-        return app($this->providers[$provider])->generate($tournamentName, $count);
+        return app($this->providers[$provider])->generate($tournamentName, $count, $existingNames);
     }
 }
