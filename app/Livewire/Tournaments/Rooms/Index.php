@@ -8,6 +8,7 @@ use App\Models\Tournament;
 use Illuminate\Support\Str;
 use App\Models\TournamentRoom;
 use Illuminate\Support\Facades\Auth;
+use App\Services\AI\RoomNameGenerator;
 
 class Index extends Component
 {
@@ -106,14 +107,16 @@ class Index extends Component
         ]);
 
         $nicknames = $this->generateAINicknames($this->bulkRoomCount);
-        $x = $this->tournament->rooms()->count();
+        $existingCount = $this->tournament->rooms()->count();
 
-        foreach (range($x + 1, $x + $this->bulkRoomCount) as $i) {
+        foreach (range(1, $this->bulkRoomCount) as $index) {
+            $roomNumber = $existingCount + $index;
+
             TournamentRoom::create([
-                'name' => "Room $i",
-                'nickname' => $nicknames[$i - 1] ?? null,
+                'name'          => "Room $roomNumber",
+                'nickname'      => $nicknames[$index - 1] ?? null,
                 'tournament_id' => $this->tournament->id,
-                'user_id' => Auth::id(),
+                'user_id'       => Auth::id(),
             ]);
         }
 
@@ -122,24 +125,14 @@ class Index extends Component
         $this->loadRooms();
     }
 
+
     /**
      * Simulated AI nickname generator
      */
     protected function generateAINicknames($count)
     {
-        $baseNames = [
-            'The Grand Oratorium', 'The Persuasion Hall', 'The Logic Arena',
-            'The Eloquence Chamber', 'Debate Den', 'Rhetoric Room', 'Reason Retreat'
-        ];
-
-        shuffle($baseNames);
-
-        $results = [];
-        for ($i = 0; $i < $count; $i++) {
-            $results[] = $baseNames[$i % count($baseNames)];
-        }
-
-        return $results;
+        return app(RoomNameGenerator::class)
+            ->generate($this->tournament->name, $count, 'gemini'); // default provider
     }
 
     public function closeModal()
