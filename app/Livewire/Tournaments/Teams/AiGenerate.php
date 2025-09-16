@@ -4,9 +4,10 @@ namespace App\Livewire\Tournaments\Teams;
 
 use Flux\Flux;
 use Livewire\Component;
-use App\Models\Tournament;
-use App\Models\TournamentTeam;
 use App\Models\TeamMember;
+use App\Models\Tournament;
+use App\Events\TeamsUpdated;
+use App\Models\TournamentTeam;
 use App\Models\TournamentDebater;
 use App\Models\TournamentInstitution;
 use App\Services\AI\GeminiTeamNameGenerator;
@@ -48,7 +49,7 @@ class AiGenerate extends Component
     public function generate1TeamPerInstitution()
     {
         foreach ($this->institutions as $institutionId => $institutionName) {
-            $names = $this->callAiGenerator("{$institutionName} Team", 1);
+            $names = $this->callAiGenerator("{$institutionName} Team participating in {$this->tournament->name}. Avoid revealing or relating to the team's or institution's real name", 1);
             $this->generatedTeams = array_merge($this->generatedTeams, $names);
             $tournamentInstitution = TournamentInstitution::where('tournament_id', $this->tournament->id)
                 ->where('institution_id', $institutionId)
@@ -60,21 +61,23 @@ class AiGenerate extends Component
             }
             $this->createTeams($names, $institutionId);
         }
+        event(new TeamsUpdated($this->tournament));
     }
 
     public function generate1TeamPerCategory()
     {
         foreach ($this->categories as $categoryId => $categoryName) {
-            $names = $this->callAiGenerator("{$categoryName} Team", 1);
+            $names = $this->callAiGenerator("{$categoryName} Team participating in {$this->tournament->name}. Avoid revealing or relating to the team's or institution's real name", 1);
             $this->generatedTeams = array_merge($this->generatedTeams, $names);
             $this->createTeams($names, null, $categoryId);
         }
+        event(new TeamsUpdated($this->tournament));
     }
 
     public function generate1TeamPerInstitutionPerCategory()
     {
         foreach ($this->institutions as $institutionId => $institutionName) {
-            
+
             $tournamentInstitution = TournamentInstitution::where('tournament_id', $this->tournament->id)
                 ->where('institution_id', $institutionId)
                 ->first();
@@ -85,10 +88,11 @@ class AiGenerate extends Component
             }
 
             foreach ($this->categories as $categoryId => $categoryName) {
-                $names = $this->callAiGenerator("{$institutionName} - {$categoryName}", 1);
+                $names = $this->callAiGenerator("{$institutionName} - {$categoryName} Team participating in {$this->tournament->name}. Avoid revealing or relating to the team's or institution's real name", 1);
                 $this->generatedTeams = array_merge($this->generatedTeams, $names);
                 $this->createTeams($names, $institutionId, $categoryId);
             }
+            event(new TeamsUpdated($this->tournament));
         }
     }
 
@@ -97,6 +101,7 @@ class AiGenerate extends Component
         $names = $this->callAiGenerator($this->tournament->name, $this->quantity);
         $this->generatedTeams = $names;
         $this->createTeams($names);
+        event(new TeamsUpdated($this->tournament));
     }
 
     protected function callAiGenerator(string $context, int $count): array
@@ -107,34 +112,52 @@ class AiGenerate extends Component
         $excludedArray = array_filter(array_map('trim', explode(',', $this->excludedNames)));
         $takenNames = array_merge($existingNames, $excludedArray);
 
+        // Pick a random style if none is given
+        $style = $this->style ?: ['creative', 'funny', 'aggressive', 'playful', 'sarcastic', 'bantering', 'epic', 'mysterious', 'punny'][array_rand(['creative', 'funny', 'aggressive', 'playful', 'sarcastic', 'bantering', 'epic', 'mysterious', 'punny'])];
+
         return $generator->generate(
             $context,
             $count,
-            $this->style ?: null,
+            $style,
             $takenNames
         );
     }
+
 
     // ---------------- TEAM CREATION ----------------
 
     protected function createTeams(array $names, ?int $institutionId = null, ?int $categoryId = null)
     {
         foreach ($names as $name) {
-            $team = TournamentTeam::firstOrCreate(
-                [
-                    'tournament_id' => $this->tournament->id,
-                    'name'          => $name,
-                ],
-                [
-                    'tournament_institution_id' => $institutionId,
-                    'participant_category_id'   => $categoryId,
-                ]
-            );
+            // Check if a team already exists for this tournament + institution + category
+            $teamExistsQuery = TournamentTeam::where('tournament_id', $this->tournament->id);
+                // ->where('name', $name);
 
-            // Automatically assign team members
+            if ($institutionId !== null) {
+                $teamExistsQuery->where('tournament_institution_id', $institutionId);
+            }
+
+            if ($categoryId !== null) {
+                $teamExistsQuery->where('participant_category_id', $categoryId);
+            }
+
+            if ($teamExistsQuery->exists()) {
+                continue; // Skip creating the team
+            }
+
+            // Create the team
+            $team = TournamentTeam::create([
+                'tournament_id' => $this->tournament->id,
+                'name'          => $name,
+                'tournament_institution_id' => $institutionId,
+                'participant_category_id'   => $categoryId,
+            ]);
+
+            // Assign team members
             $this->assignTeamMembers($team, $institutionId, $categoryId);
         }
     }
+
 
     /**
      * Assign team members from debaters in the same institution/category
@@ -176,7 +199,8 @@ class AiGenerate extends Component
             'generatedTeams'
         ]);
 
-        Flux::modal('generate-teams-modal')->close();
+        Flux::modals()->close();
+        
     }
 
     public function render()
