@@ -50,6 +50,7 @@
 
                     {{-- Role --}}
                     <flux:select label="Role" badge="Required" wire:model.live="role" placeholder="Choose role...">
+                        <flux:select.option value="">Choose Role...</flux:select.option>
                         <flux:select.option>Debater</flux:select.option>
                         <flux:select.option>Patron</flux:select.option>
                         <flux:select.option>Judge</flux:select.option>
@@ -59,6 +60,7 @@
                     {{-- Institution --}}
                     <flux:select label="Institution" badge="Required" wire:model="institution"
                         placeholder="Choose Institution...">
+                        <flux:select.option value="">-- Choose Institution --</flux:select.option>
                         @foreach ($institutions as $inst)
                             <flux:select.option value="{{ $inst->id }}">{{ $inst->name }}</flux:select.option>
                         @endforeach
@@ -71,6 +73,7 @@
                     @if ($role === 'Debater')
                         <flux:select label="Debater Category" badge="Required" wire:model="participantCategory"
                             placeholder="Choose category...">
+                            <flux:select.option value="">-- Choose Category --</flux:select.option>
                             @foreach ($participantCategories as $category)
                                 <flux:select.option value="{{ $category->id }}">{{ $category->name }}
                                 </flux:select.option>

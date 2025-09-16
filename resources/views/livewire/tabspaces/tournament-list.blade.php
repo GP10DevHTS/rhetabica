@@ -39,7 +39,7 @@
 
     <div class="mt-6">
         @if ($tournaments->count() > 0)
-            <div class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
+            <div class="overflow-x-auto shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
                 <table class="min-w-full divide-y divide-gray-300 dark:divide-gray-700">
                     <thead class="bg-gray-50 dark:bg-gray-800">
                         <tr>

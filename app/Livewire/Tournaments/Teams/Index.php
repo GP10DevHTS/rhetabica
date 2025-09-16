@@ -7,6 +7,7 @@ use Livewire\Component;
 use App\Models\TeamMember;
 use App\Models\Tournament;
 use Illuminate\Support\Str;
+use App\Events\TeamsUpdated;
 use App\Models\TournamentTeam;
 use Illuminate\Validation\Rule;
 use App\Models\TournamentDebater;
@@ -42,6 +43,7 @@ class Index extends Component
         ]);
 
         flash()->addSuccess('Team created successfully.');
+        event(new TeamsUpdated($this->tournament));
         $this->closeModal();
     }
 
@@ -68,6 +70,7 @@ class Index extends Component
         ]);
 
         flash()->addSuccess('Team updated successfully.');
+        event(new TeamsUpdated($this->tournament));
         $this->closeModal();
     }
 
@@ -83,7 +86,10 @@ class Index extends Component
     public function deleteTeam()
     {
         TournamentTeam::findOrFail($this->deleteTeamId)->delete();
+
         flash()->addSuccess('Team deleted successfully.');
+        event(new TeamsUpdated($this->tournament));
+
         $this->closeModal();
     }
 
@@ -150,13 +156,20 @@ class Index extends Component
 
     private function loadAvailableDebaters()
     {
-    $this->availableDebaters = TournamentDebater::withoutTeam()
+        $this->availableDebaters = TournamentDebater::withoutTeam()
                 ->where('tournament_id', $this->tournament->id)
                 ->with('participant') // eager load participant
                 ->get()
                 ->mapWithKeys(fn($debater) => [
                     $debater->id => $debater->participant->name . ($debater->nickname ? " ({$debater->nickname})" : ""),
                 ]);
+
+    }
+
+    public function loadTeams(){
+        // load tournament teams relationship
+        $this->tournament->load('teams');
+        $this->loadAvailableDebaters();
     }
 
 
@@ -175,7 +188,8 @@ class Index extends Component
         $this->teamMembers = $this->managingTeam->fresh()->members;
         $this->reset(['newMemberDebater', 'newMemberRole']);
 
-        $this->loadAvailableDebaters();
+        event(new TeamsUpdated($this->tournament));
+
 
         flash()->addSuccess('Member added successfully.');
     }
@@ -184,8 +198,8 @@ class Index extends Component
     {
         TeamMember::findOrFail($id)->delete();
         $this->teamMembers = $this->managingTeam->fresh()->members;
-        $this->loadAvailableDebaters();
-        
+        event(new TeamsUpdated($this->tournament));
+
         flash()->addSuccess('Member removed successfully.');
     }
 

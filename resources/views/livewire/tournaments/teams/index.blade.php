@@ -156,5 +156,12 @@
 
     </div>
 
+    @script
+    <script>
+        tournamentChannel.bind('teams-updated', function(data) {
+            @this.loadTeams();
+        });
+    </script>
+    @endscript
 
 </div>

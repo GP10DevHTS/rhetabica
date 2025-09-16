@@ -19,6 +19,7 @@
         <div>
             <flux:select badge="optional" label="Participant Category" wire:model="participantCategory"
                 description="Only this category shall be allowed on the team" placeholder="Choose Category...">
+                <flux:select.option value="">None</flux:select.option>
                 @foreach ($participantCategories as $categoryid => $categoryname)
                     <flux:select.option value="{{ $categoryid }}">
                         {{ $categoryname }}
@@ -30,6 +31,7 @@
         <div>
             <flux:select badge="optional" label="Institution" wire:model="tournamentInstitution"
                 description="In case the team is affiliated to one" placeholder="Choose Institution...">
+                <flux:select.option value="">Choose Institution</flux:select.option>
                 @foreach ($tournament->institutions as $institution)
                     <flux:select.option value="{{ $institution->id }}">
                         {{ $institution->name_override ?? $institution->institution->name }}

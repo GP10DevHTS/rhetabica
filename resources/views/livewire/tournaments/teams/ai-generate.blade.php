@@ -60,11 +60,12 @@
                         description="Comma-separated names to avoid..."></flux:textarea>
                 </div>
 
-               
+
 
                 <!-- Tone / Style (optional) -->
                 <div>
                     <flux:select label="Style (optional)" wire:model="style">
+                        <flux:select.option value="">-- Choose Style --</flux:select.option>
                         <flux:select.option value="">Neutral</flux:select.option>
                         <flux:select.option value="creative">Creative</flux:select.option>
                         <flux:select.option value="aggressive">Aggressive</flux:select.option>
@@ -91,7 +92,7 @@
                     </flux:button>
                 </div>
 
-               
+
 
             </div>
         </flux:modal>

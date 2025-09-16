@@ -22,6 +22,8 @@ class TeamsUpdated implements ShouldBroadcast
     public function __construct($tournament)
     {
         $this->tournament = $tournament;
+
+        // dd($this->tournament);
     }
 
     /**
@@ -32,7 +34,12 @@ class TeamsUpdated implements ShouldBroadcast
     public function broadcastOn(): array
     {
         return [
-            new Channel('my-channel'),
+            new Channel($this->tournament->slug),
         ];
+    }
+
+    public function broadcastAs()
+    {
+        return 'teams-updated';
     }
 }

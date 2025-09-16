@@ -89,4 +89,10 @@
         </div>
 
     </div>
+
+    @push('scripts')
+        <script>
+            var tournamentChannel = pusher.subscribe('{{ $tournament->slug }}');
+        </script>
+    @endpush
 </div>

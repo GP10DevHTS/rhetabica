@@ -18,10 +18,10 @@ var pusher = new Pusher('{{ config('app.pusher.app_key') }}', {
     cluster: '{{ config('app.pusher.app_cluster') }}',
 });
 
-var channel = pusher.subscribe('my-channel');
-channel.bind('my-event', function(data) {
-    alert(JSON.stringify(data));
-});
+// var channel = pusher.subscribe('my-channel');
+// channel.bind('my-event', function(data) {
+//     alert(JSON.stringify(data));
+// });
 </script>
 
 @vite(['resources/css/app.css', 'resources/js/app.js'])

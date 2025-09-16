@@ -92,8 +92,8 @@ class AiGenerate extends Component
                 $this->generatedTeams = array_merge($this->generatedTeams, $names);
                 $this->createTeams($names, $institutionId, $categoryId);
             }
-            event(new TeamsUpdated($this->tournament));
         }
+        event(new TeamsUpdated($this->tournament));
     }
 
     public function generateTeams()
@@ -200,7 +200,7 @@ class AiGenerate extends Component
         ]);
 
         Flux::modals()->close();
-        
+
     }
 
     public function render()
