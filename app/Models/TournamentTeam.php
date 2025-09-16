@@ -34,6 +34,11 @@ class TournamentTeam extends Model
             }
             $model->slug = Str::slug($model->name);
         });
+
+        // on delete, also delete members
+        static::deleting(function ($model) {
+            $model->members()->delete();
+        });
     }
 
     public function tournament()
