@@ -30,7 +30,7 @@
                 </div>
 
                 <form wire:submit.prevent="inviteInstitution" class="space-y-4">
-                    
+
                     <flux:select label="Institution" placeholder="Select institution" wire:model="newInstitution">
                         @foreach ($institutions as $institution)
                             <flux:select.option value="{{ $institution->id }}">{{ $institution->name }}</flux:select.option>
@@ -90,11 +90,15 @@
                     </div>
                 </div>
             @empty
-                <div icon="users" title="No invitations yet"
+                <div class="text-center items-center" title="No invitations yet"
                     text="Start by inviting an institution to your tournament.">
+                    There are no institutions invited yet.
+                    <br />
+                    Maybe start by adding
                     <flux:modal.trigger name="add-invite">
-                        <flux:button icon="plus">Invite Institution</flux:button>
+                        <flux:badge as="button" variant="pill" icon="plus" size="lg">adding</flux:badge>
                     </flux:modal.trigger>
+                    one?
                 </div>
             @endforelse
         </div>

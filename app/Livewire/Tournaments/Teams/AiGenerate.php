@@ -6,6 +6,8 @@ use Flux\Flux;
 use Livewire\Component;
 use App\Models\Tournament;
 use App\Models\TournamentTeam;
+use App\Models\TeamMember;
+use App\Models\TournamentDebater;
 use App\Services\AI\GeminiTeamNameGenerator;
 
 class AiGenerate extends Component
@@ -89,20 +91,17 @@ class AiGenerate extends Component
         return $generator->generate(
             $context,
             $count,
-            $this->style ?: null, // style
-            $takenNames           // excluded names
+            $this->style ?: null,
+            $takenNames
         );
     }
 
     // ---------------- TEAM CREATION ----------------
 
-    /**
-     * Create teams in the database
-     */
     protected function createTeams(array $names, ?int $institutionId = null, ?int $categoryId = null)
     {
         foreach ($names as $name) {
-            TournamentTeam::firstOrCreate(
+            $team = TournamentTeam::firstOrCreate(
                 [
                     'tournament_id' => $this->tournament->id,
                     'name'          => $name,
@@ -112,6 +111,36 @@ class AiGenerate extends Component
                     'participant_category_id'   => $categoryId,
                 ]
             );
+
+            // Automatically assign team members
+            $this->assignTeamMembers($team, $institutionId, $categoryId);
+        }
+    }
+
+    /**
+     * Assign team members from debaters in the same institution/category
+     */
+    protected function assignTeamMembers(TournamentTeam $team, ?int $institutionId, ?int $categoryId)
+    {
+        $debaterQuery = TournamentDebater::query()
+            ->where('tournament_id', $this->tournament->id);
+
+        if ($institutionId) {
+            $debaterQuery->where('tournament_institution_id', $institutionId);
+        }
+
+        if ($categoryId) {
+            $debaterQuery->where('participant_category_id', $categoryId);
+        }
+
+        // Limit to 3 members per team by default
+        $debaterIds = $debaterQuery->inRandomOrder()->limit(3)->pluck('id');
+
+        foreach ($debaterIds as $debaterId) {
+            TeamMember::firstOrCreate([
+                'tournament_team_id'   => $team->id,
+                'tournament_debater_id'=> $debaterId,
+            ]);
         }
     }
 
