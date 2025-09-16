@@ -158,10 +158,11 @@ class Index extends Component
     {
         $this->availableDebaters = TournamentDebater::withoutTeam()
                 ->where('tournament_id', $this->tournament->id)
-                ->with('participant') // eager load participant
+                ->with('participant', 'institution.institution') // eager load participant
                 ->get()
                 ->mapWithKeys(fn($debater) => [
-                    $debater->id => $debater->participant->name . ($debater->nickname ? " ({$debater->nickname})" : ""),
+                    $debater->id => $debater->participant->name . ($debater->nickname ? " ({$debater->nickname})" : "" ) 
+                        . " - " . ($debater->institution?->institution?->name ?? 'No Institution'),
                 ]);
 
     }
