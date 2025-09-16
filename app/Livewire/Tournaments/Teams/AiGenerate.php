@@ -8,6 +8,7 @@ use App\Models\Tournament;
 use App\Models\TournamentTeam;
 use App\Models\TeamMember;
 use App\Models\TournamentDebater;
+use App\Models\TournamentInstitution;
 use App\Services\AI\GeminiTeamNameGenerator;
 
 class AiGenerate extends Component
@@ -49,6 +50,14 @@ class AiGenerate extends Component
         foreach ($this->institutions as $institutionId => $institutionName) {
             $names = $this->callAiGenerator("{$institutionName} Team", 1);
             $this->generatedTeams = array_merge($this->generatedTeams, $names);
+            $tournamentInstitution = TournamentInstitution::where('tournament_id', $this->tournament->id)
+                ->where('institution_id', $institutionId)
+                ->first();
+            if ($tournamentInstitution) {
+                $institutionId = $tournamentInstitution->id;
+            } else {
+                $institutionId = null;
+            }
             $this->createTeams($names, $institutionId);
         }
     }
@@ -65,6 +74,16 @@ class AiGenerate extends Component
     public function generate1TeamPerInstitutionPerCategory()
     {
         foreach ($this->institutions as $institutionId => $institutionName) {
+            
+            $tournamentInstitution = TournamentInstitution::where('tournament_id', $this->tournament->id)
+                ->where('institution_id', $institutionId)
+                ->first();
+            if ($tournamentInstitution) {
+                $institutionId = $tournamentInstitution->id;
+            } else {
+                $institutionId = null;
+            }
+
             foreach ($this->categories as $categoryId => $categoryName) {
                 $names = $this->callAiGenerator("{$institutionName} - {$categoryName}", 1);
                 $this->generatedTeams = array_merge($this->generatedTeams, $names);
