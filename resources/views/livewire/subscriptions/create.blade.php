@@ -20,7 +20,7 @@
                     <label for="user_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         User *
                     </label>
-                    <select wire:model="user_id" id="user_id" 
+                    <select wire:model="user_id" id="user_id"
                             class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white @error('user_id') border-red-500 dark:border-red-400 @enderror">
                         <option value="">Select a user</option>
                         @foreach($users as $user)
@@ -37,7 +37,7 @@
                     <label for="package_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         Package *
                     </label>
-                    <select wire:model="package_id" id="package_id" 
+                    <select wire:model="package_id" id="package_id"
                             class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white @error('package_id') border-red-500 dark:border-red-400 @enderror">
                         <option value="">Select a package</option>
                         @foreach($packages as $package)
@@ -78,8 +78,9 @@
                     <label for="status" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         Status *
                     </label>
-                    <select wire:model="status" id="status" 
+                    <select wire:model="status" id="status"
                             class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white @error('status') border-red-500 dark:border-red-400 @enderror">
+                        <option value="">Select status</option>
                         <option value="active">Active</option>
                         <option value="inactive">Inactive</option>
                         <option value="expired">Expired</option>
@@ -91,11 +92,11 @@
 
                 <!-- Submit Button -->
                 <div class="flex justify-end space-x-3">
-                    <a href="{{ route('subscriptions.index') }}" 
+                    <a href="{{ route('subscriptions.index') }}"
                        class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-150">
                         Cancel
                     </a>
-                    <button type="submit" 
+                    <button type="submit"
                             class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-150">
                         Create Subscription
                     </button>
@@ -103,4 +104,4 @@
             </form>
         </div>
     </div>
-</div> 
+</div>

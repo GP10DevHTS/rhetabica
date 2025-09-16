@@ -65,7 +65,7 @@ return [
     |
     */
 
-    'timezone' => 'UTC',
+    'timezone' => 'Africa/Kampala',
 
     /*
     |--------------------------------------------------------------------------
@@ -121,6 +121,20 @@ return [
     'maintenance' => [
         'driver' => env('APP_MAINTENANCE_DRIVER', 'file'),
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Pusher Configuration
+    |--------------------------------------------------------------------------
+    | Here you may configure your settings for Pusher, the WebSocket service.
+    | This will be used to provide real-time capabilities to your
+    | application.
+    |--------------------------------------------------------------------------
+    */
+    'pusher' => [
+        'app_key' => env('PUSHER_APP_KEY', ''),
+        'app_cluster' => env('PUSHER_APP_CLUSTER', 'us2'),
     ],
 
 ];

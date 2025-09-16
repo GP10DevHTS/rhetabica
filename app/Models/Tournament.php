@@ -60,6 +60,61 @@ class Tournament extends Model
 
     public function institutions()
     {
-        return $this->hasMany(TournamentInstitution::class);
+        return $this->hasMany(TournamentInstitution::class, 'tournament_id');
     }
+
+    public function participants()
+    {
+        // new members in the system
+        return $this->hasMany(TournamentParticipant::class);
+    }
+
+    public function judges()
+    {
+        return $this->hasMany(TournamentJudge::class);
+    }
+
+    public function tabMasters()
+    {
+        return $this->hasMany(TournamentTabMaster::class);
+    }
+    public function patrons()
+    {
+        return $this->hasMany(TournamentPatron::class);
+    }
+    public function debaters()
+    {
+        // actual debters for the whole tournament
+        return $this->hasMany(TournamentDebater::class);
+    }
+
+    // teams
+    public function teams(){
+        return $this->hasMany(TournamentTeam::class);
+    }
+
+    public function participantCategories()
+    {
+        return ParticipantCategory::whereIn(
+            'id',
+            $this->debaters()->pluck('participant_category_id')->filter()->unique()
+        );
+    }
+
+     public function participantInstitutions()
+    {
+        return Institution::whereIn(
+            'id',
+            $this->institutions()
+                ->whereNotNull('arrived_at')
+                ->pluck('institution_id')->filter()->unique()
+        );
+    }
+
+    public function rooms()
+    {
+        return $this->hasMany(TournamentRoom::class);
+    }
+
 }
+

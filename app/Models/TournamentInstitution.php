@@ -76,4 +76,19 @@ class TournamentInstitution extends Model
     {
         return $this->belongsTo(User::class, 'arrived_recorded_by');
     }
+
+    public function getDisplayNameAttribute()
+    {
+        return $this->name_override ?: ($this->institution ? $this->institution->name : 'Unknown Institution');
+    }
+
+    public function getNameAttribute()
+    {
+        if ($this->name_override && $this->institution) {
+            return "{$this->name_override} ({$this->institution->name})";
+        }
+
+        return $this->name_override ?: ($this->institution ? $this->institution->name : 'Unknown Institution');
+    }
+
 }

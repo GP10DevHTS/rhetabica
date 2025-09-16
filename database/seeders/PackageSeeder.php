@@ -50,8 +50,11 @@ class PackageSeeder extends Seeder
         ];
 
         foreach ($packages as $package) {
-            $createdPackage = Package::create($package);
-            $this->command->info("Created package: {$createdPackage->name} - \${$createdPackage->price}");
+            $createdPackage = Package::updateOrCreate(
+                ['name' => $package['name']], // Unique identifier
+                $package // Values to update or set
+            );
+            $this->command->info("Created or updated package: {$createdPackage->name} - \${$createdPackage->price}");
         }
 
         $this->command->info('Packages seeded successfully!');

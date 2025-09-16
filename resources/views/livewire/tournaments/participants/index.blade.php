@@ -50,6 +50,7 @@
 
                     {{-- Role --}}
                     <flux:select label="Role" badge="Required" wire:model.live="role" placeholder="Choose role...">
+                        <flux:select.option value="">Choose Role...</flux:select.option>
                         <flux:select.option>Debater</flux:select.option>
                         <flux:select.option>Patron</flux:select.option>
                         <flux:select.option>Judge</flux:select.option>
@@ -59,6 +60,7 @@
                     {{-- Institution --}}
                     <flux:select label="Institution" badge="Required" wire:model="institution"
                         placeholder="Choose Institution...">
+                        <flux:select.option value="">-- Choose Institution --</flux:select.option>
                         @foreach ($institutions as $inst)
                             <flux:select.option value="{{ $inst->id }}">{{ $inst->name }}</flux:select.option>
                         @endforeach
@@ -71,6 +73,7 @@
                     @if ($role === 'Debater')
                         <flux:select label="Debater Category" badge="Required" wire:model="participantCategory"
                             placeholder="Choose category...">
+                            <flux:select.option value="">-- Choose Category --</flux:select.option>
                             @foreach ($participantCategories as $category)
                                 <flux:select.option value="{{ $category->id }}">{{ $category->name }}
                                 </flux:select.option>
@@ -93,10 +96,10 @@
         {{-- Debaters --}}
         @if ($debaters && count($debaters) > 0)
             <div>
-                <h3 class="text-lg font-bold mb-4 text-gray-100 dark:text-gray-200">Debaters</h3>
+                <h3 class="text-lg font-bold mb-4 text-gray-600 dark:text-gray-200">Debaters</h3>
                 @foreach ($debaters as $category => $debaterGroup)
                     <div class="mb-6">
-                        <h4 class="font-semibold mb-2 text-gray-200 dark:text-gray-300">{{ $category }}</h4>
+                        <h4 class="font-semibold mb-2 text-gray-400 dark:text-gray-300">{{ $category }}</h4>
                         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                             @foreach ($debaterGroup as $debater)
                                 <div
@@ -124,7 +127,7 @@
         {{-- Judges --}}
         @if ($judges && count($judges) > 0)
             <div>
-                <h3 class="text-lg font-bold mb-4 text-gray-100 dark:text-gray-200">Judges</h3>
+                <h3 class="text-lg font-bold mb-4 text-gray-600 dark:text-gray-200">Judges</h3>
                 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                     @foreach ($judges as $judge)
                         <div class="p-4 border rounded shadow-sm bg-white dark:bg-gray-800 dark:border-gray-700">
@@ -147,7 +150,7 @@
         {{-- Patrons --}}
         @if ($patrons && count($patrons) > 0)
             <div>
-                <h3 class="text-lg font-bold mb-4 text-gray-100 dark:text-gray-200">Patrons</h3>
+                <h3 class="text-lg font-bold mb-4 text-gray-600 dark:text-gray-200">Patrons</h3>
                 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                     @foreach ($patrons as $patron)
                         <div class="p-4 border rounded shadow-sm bg-white dark:bg-gray-800 dark:border-gray-700">
@@ -170,7 +173,7 @@
         {{-- Tab Masters --}}
         @if ($tabMasters && count($tabMasters) > 0)
             <div>
-                <h3 class="text-lg font-bold mb-4 text-gray-100 dark:text-gray-200">Tab Masters</h3>
+                <h3 class="text-lg font-bold mb-4 text-gray-600 dark:text-gray-200">Tab Masters</h3>
                 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                     @foreach ($tabMasters as $tabMaster)
                         <div class="p-4 border rounded shadow-sm bg-white dark:bg-gray-800 dark:border-gray-700">

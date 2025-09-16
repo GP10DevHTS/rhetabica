@@ -63,4 +63,15 @@ class TournamentDebater extends Model
     {
         return $this->belongsTo(ParticipantCategory::class, 'participant_category_id');
     }
+
+    public function teamMember()
+    {
+        return $this->hasOne(TeamMember::class, 'tournament_debater_id');
+    }
+
+    public function scopeWithoutTeam($query)
+    {
+        return $query->whereDoesntHave('teamMember');
+    }
+
 }
