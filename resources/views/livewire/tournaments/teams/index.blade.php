@@ -118,6 +118,9 @@
                                     @endif
                                 </p>
                                 <p class="text-xs text-gray-500 dark:text-gray-400">
+                                    Institution: <span class="font-semibold">{{ ucfirst($member->debater?->institution?->institution?->name ?? '—') }}</span>
+                                </p>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">
                                     Role: <span class="font-semibold">{{ ucfirst($member->role ?? '—') }}</span>
                                 </p>
                             </div>
