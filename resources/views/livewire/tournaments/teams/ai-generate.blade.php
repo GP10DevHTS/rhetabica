@@ -16,16 +16,16 @@
 
 
                 <div class="flex space-x-2 gap-2">
-                    <flux:button variant="primary" icon="sparkles" wire:click="generateTeams" size="sm">
+                    <flux:button variant="primary" icon="sparkles" wire:click="generate1TeamPerInstitution" size="sm">
                         1 Team per institution
                     </flux:button>
 
 
-                    <flux:button variant="primary" icon="sparkles" wire:click="generateTeams" size="sm">
+                    <flux:button variant="primary" icon="sparkles" wire:click="generate1TeamPerCategory" size="sm">
                         1 Team per Category
                     </flux:button>
 
-                    <flux:button variant="primary" icon="sparkles" wire:click="generateTeams" size="sm">
+                    <flux:button variant="primary" icon="sparkles" wire:click="generate1TeamPerInstitutionPerCategory" size="sm">
                         1 Team per institution per category
                     </flux:button>
                 </div>
@@ -60,19 +60,7 @@
                         description="Comma-separated names to avoid..."></flux:textarea>
                 </div>
 
-                {{-- <!-- Number of Teams to Generate -->
-                <div class="flex space-x-4">
-                    <flux:input type="number" label="Number of Teams" wire:model="quantity" min="1"
-                        max="20" value="5" description="Default: 5 teams"></flux:input>
-
-                    <flux:input type="number" label="Teams per Institution" wire:model="teamsPerInstitution"
-                        min="1" max="5" value="1"
-                        description="Number of teams to generate per selected institution">
-                    </flux:input>
-                </div> --}}
-
-
-
+               
 
                 <!-- Tone / Style (optional) -->
                 <div>

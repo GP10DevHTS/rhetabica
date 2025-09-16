@@ -6,6 +6,7 @@ use Livewire\Component;
 use App\Models\Tournament;
 use App\Models\TournamentTeam;
 use App\Models\TournamentDebater;
+use App\Services\AI\GeminiTeamNameGenerator;
 
 class AiGenerate extends Component
 {
@@ -29,60 +30,98 @@ class AiGenerate extends Component
     {
         $this->tournament = $tournament;
 
-        // Load options for selects
         $this->institutions = $tournament->participantInstitutions()->pluck('name', 'id')->toArray();
-        $this->categories = $tournament->participantCategories()->pluck('name', 'id')->toArray();
+        $this->categories   = $tournament->participantCategories()->pluck('name', 'id')->toArray();
 
-        $this->excludedNames = TournamentTeam::where('tournament_id', $tournament->id)
-            ->pluck('name')
-            ->implode(', ');
-        // dd($this->categories, $this->institutions);
+        $this->excludedNames = implode(', ', $this->loadExistingTeamNames());
     }
 
-    public function generateTeams()
+    public function loadExistingTeamNames(): array
     {
-        // Get already taken names to avoid duplicates
-        $existingNames = TournamentTeam::where('tournament_id', $this->tournament->id)
+        return TournamentTeam::where('tournament_id', $this->tournament->id)
             ->pluck('name')
             ->toArray();
-
-        $exclude = array_merge($existingNames, array_map('trim', explode(',', $this->excludedNames)));
-
-        // Prepare prompt/data for AI service
-        $prompt = [
-            'institution' => $this->selectedInstitution ? $this->institutions[$this->selectedInstitution] : 'Any',
-            'category' => $this->selectedCategory ? $this->categories[$this->selectedCategory] : 'Any',
-            'exclude' => $exclude,
-            'quantity' => $this->quantity,
-            'style' => $this->style ?: 'Neutral',
-        ];
-
-        // Simulate AI generation (replace with actual AI API call)
-        $this->generatedTeams = $this->simulateAIGeneration($prompt);
-
-        flash()->addSuccess('Teams generated successfully!');
     }
 
-    protected function simulateAIGeneration($prompt)
+    /**
+     * Generate one team per institution
+     */
+    public function generate1TeamPerInstitution()
     {
-        // Dummy generation for testing
-        $teams = [];
-        $prefix = $prompt['institution'] !== 'Any' ? $prompt['institution'] . ' ' : '';
-        $suffixStyle = $prompt['style'] ? ' (' . ucfirst($prompt['style']) . ')' : '';
-
-        for ($i = 1; $i <= $prompt['quantity']; $i++) {
-            $teams[] = $prefix . 'Team ' . $i . $suffixStyle;
+        foreach ($this->institutions as $institutionId => $institutionName) {
+            $this->generatedTeams = array_merge(
+                $this->generatedTeams,
+                $this->callAiGenerator("{$institutionName} Team", 1)
+            );
         }
+    }
 
-        // Remove duplicates if any
-        $teams = array_diff($teams, $prompt['exclude']);
+    /**
+     * Generate one team per category
+     */
+    public function generate1TeamPerCategory()
+    {
+        foreach ($this->categories as $categoryId => $categoryName) {
+            $this->generatedTeams = array_merge(
+                $this->generatedTeams,
+                $this->callAiGenerator("{$categoryName} Team", 1)
+            );
+        }
+    }
 
-        return $teams;
+    /**
+     * Generate one team per institution per category
+     */
+    public function generate1TeamPerInstitutionPerCategory()
+    {
+        foreach ($this->institutions as $institutionName) {
+            foreach ($this->categories as $categoryName) {
+                $this->generatedTeams = array_merge(
+                    $this->generatedTeams,
+                    $this->callAiGenerator("{$institutionName} - {$categoryName}", 1)
+                );
+            }
+        }
+    }
+
+    /**
+     * General AI generation (based on modal inputs)
+     */
+    public function generateTeams()
+    {
+        $this->generatedTeams = $this->callAiGenerator($this->tournament->name, $this->quantity);
+    }
+
+    /**
+     * Wrapper for AI call
+     */
+    protected function callAiGenerator(string $context, int $count): array
+    {
+        $generator = app(GeminiTeamNameGenerator::class);
+
+        $existingNames = $this->loadExistingTeamNames();
+        $excludedArray = array_filter(array_map('trim', explode(',', $this->excludedNames)));
+
+        $takenNames = array_merge($existingNames, $excludedArray);
+
+        return $generator->generate(
+            $context,
+            $count,
+            $this->style ?: null,
+            $takenNames,
+        );
     }
 
     public function closeModal()
     {
-        $this->reset(['selectedInstitution', 'selectedCategory', 'excludedNames', 'quantity', 'style', 'generatedTeams']);
+        $this->reset([
+            'selectedInstitution',
+            'selectedCategory',
+            'excludedNames',
+            'quantity',
+            'style',
+            'generatedTeams'
+        ]);
         $this->dispatchBrowserEvent('closeModal', ['modal' => 'generate-teams-modal']);
     }
 
