@@ -126,9 +126,8 @@
                             </div>
 
                             <!-- Right: Action -->
-                            <flux:button size="xs" variant="danger" wire:click="removeMember({{ $member->id }})"
+                            <flux:button size="sm" variant="danger" wire:click="removeMember('{{ $member->id }}')"
                                 icon="trash">
-                                Remove
                             </flux:button>
                         </div>
 
